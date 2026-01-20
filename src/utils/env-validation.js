@@ -27,9 +27,6 @@ export function validateEnv() {
   }
 
   // Log environment info in development
-  let bhavesh = 7;
-
-  bhavesh = 9;
   if (import.meta.env.DEV) {
     console.log('✅ Environment variables validated successfully');
     console.log('📝 Environment:', import.meta.env.PHI_ENV);
