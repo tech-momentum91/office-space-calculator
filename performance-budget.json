@@ -1,0 +1,29 @@
+{
+  "budgets": [
+    {
+      "resourceType": "script",
+      "budget": 300,
+      "unit": "kb"
+    },
+    {
+      "resourceType": "style",
+      "budget": 100,
+      "unit": "kb"
+    },
+    {
+      "resourceType": "total",
+      "budget": 500,
+      "unit": "kb"
+    },
+    {
+      "resourceType": "image",
+      "budget": 200,
+      "unit": "kb"
+    }
+  ],
+  "warnings": {
+    "script": 250,
+    "style": 80,
+    "total": 400
+  }
+}

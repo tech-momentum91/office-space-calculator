@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@features/*": ["./src/features/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@store/*": ["./src/store/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@pages/*": ["./src/pages/*"]
+    },
+    "target": "ES2015",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
