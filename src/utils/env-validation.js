@@ -3,9 +3,9 @@
  * Validates required environment variables on app startup
  */
 
-const requiredEnvVariables = ['PHI_API_URL', 'PHI_ENV'];
+const requiredEnvVariables = ['PHI_ENV'];
 
-const optionalEnvVariables = ['PHI_ENABLE_ANALYTICS', 'PHI_ENABLE_ERROR_TRACKING'];
+const optionalEnvVariables = ['PHI_ENABLE_ANALYTICS', 'PHI_ENABLE_ERROR_TRACKING', 'PHI_API_URL'];
 
 /**
  * Validates all required environment variables are present
