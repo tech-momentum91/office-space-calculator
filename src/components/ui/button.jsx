@@ -17,6 +17,9 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         gradient:
           'text-white shadow-[0px_1px_2px_rgba(0,0,0,0.05)] font-["Plus_Jakarta_Sans",sans-serif] font-bold text-[15px] leading-[24px] tracking-normal text-center transition-opacity hover:opacity-90',
+        // Figma node-id=1209:39367 (layout option card)
+        layoutOption:
+          'h-auto w-full justify-start whitespace-normal bg-white text-left shadow-none hover:bg-white hover:text-current',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -24,6 +27,8 @@ const buttonVariants = cva(
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',
         phone: 'w-[180px] h-[48px] rounded-lg pt-[12px] pr-[19px] pb-[12px] pl-[18px]',
+        // Used with variant="layoutOption"
+        layoutOption: 'h-auto p-[12px] rounded-[11px]',
       },
     },
     defaultVariants: {

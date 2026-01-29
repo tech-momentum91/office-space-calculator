@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { baseApi } from './api/baseApi';
 import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
+import officeCalculatorReducer from './slices/officeCalculatorSlice';
 
 /**
  * Redux store configuration
@@ -14,6 +15,7 @@ export const store = configureStore({
     // Feature reducers
     auth: authReducer,
     ui: uiReducer,
+    officeCalculator: officeCalculatorReducer,
   },
   // Add RTK Query middleware for caching, invalidation, polling, etc.
   middleware: (getDefaultMiddleware) => [
@@ -32,3 +34,4 @@ export const store = configureStore({
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export const selectAuth = (state) => state.auth;
 export const selectUI = (state) => state.ui;
+export const selectOfficeCalculator = (state) => state.officeCalculator;

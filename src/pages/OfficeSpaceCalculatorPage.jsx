@@ -8,6 +8,7 @@ import mainBg from '@/assets/Main.jpg';
 import faqBg from '@/assets/faq.png';
 import illustration from '@/assets/illustation.png';
 import FaqSection from '@/components/sections/FaqSection';
+import OfficeSpaceCalculatorCard from '@/components/office-space-calculator/OfficeSpaceCalculatorCard';
 export default function OfficeSpaceCalculatorPage() {
   const faqItems = [
     {
@@ -44,7 +45,7 @@ export default function OfficeSpaceCalculatorPage() {
   return (
     <div className='min-h-screen '>
       <section
-        className='relative overflow-hidden min-h-[560px] sm:min-h-[640px] lg:h-[664px]'
+        className='relative overflow-visible min-h-[560px] sm:min-h-[640px] lg:h-[664px]'
         style={{
           backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${mainBg})`,
           backgroundPosition: 'center',
@@ -59,9 +60,9 @@ export default function OfficeSpaceCalculatorPage() {
         <Header />
 
         {/* Hero (Figma: node-id=1209-38023) */}
-        <div className='relative mx-auto w-full max-w-[1280px] px-4 pb-10 pt-6 sm:px-5 lg:px-8 lg:pb-14 lg:pt-10'>
+        <div className='relative mx-auto w-full max-w-[1280px] px-4 pb-24 pt-6 sm:px-5 lg:px-8 lg:pb-[215px] lg:pt-10'>
           <div className='grid items-start gap-10 lg:grid-cols-[1fr_420px] lg:gap-16'>
-            <h1 className='flex w-full flex-col justify-center text-[52px] font-semibold leading-[104%] tracking-[-3px] text-white sm:text-[64px] lg:h-[201px] lg:w-[624px] lg:text-[64px]'>
+            <h1 className='flex w-full flex-col justify-center text-[52px] font-semibold leading-[104%] tracking-[-3px] text-white sm:text-[64px] lg:h-[230px] lg:w-[624px] lg:text-[64px]'>
               <span className='block'>Office Space</span>
               <span className='block'>
                 <span>Calculator</span>
@@ -86,38 +87,17 @@ export default function OfficeSpaceCalculatorPage() {
         </div>
       </section>
 
-      {/* Calculator container (placeholder for now) */}
-      <main className='mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-5 lg:px-8'>
-        <div className='grid gap-6 lg:grid-cols-[1fr_420px]'>
-          <section className='rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm'>
-            <h2 className='text-xl font-semibold text-neutral-900'>Your inputs</h2>
-            <p className='mt-2 text-sm text-neutral-600'>
-              We’ll implement the full calculator UI here per Figma.
-            </p>
-
-            <div className='mt-6 grid gap-4 sm:grid-cols-2'>
-              <div className='rounded-xl border border-neutral-200 bg-neutral-50 p-4'>
-                <div className='text-sm font-medium text-neutral-900'>Team size</div>
-                <div className='mt-1 text-sm text-neutral-600'>Coming next</div>
-              </div>
-              <div className='rounded-xl border border-neutral-200 bg-neutral-50 p-4'>
-                <div className='text-sm font-medium text-neutral-900'>Workstyle</div>
-                <div className='mt-1 text-sm text-neutral-600'>Coming next</div>
-              </div>
-            </div>
-          </section>
-
-          <aside className='rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm'>
-            <h2 className='text-xl font-semibold text-neutral-900'>Estimated space</h2>
-            <p className='mt-2 text-sm text-neutral-600'>We’ll compute and show results here.</p>
-
-            <div className='mt-6 rounded-xl bg-neutral-50 p-4'>
-              <div className='text-sm text-neutral-600'>Total</div>
-              <div className='mt-1 text-3xl font-semibold text-neutral-900'>— sq ft</div>
-            </div>
-          </aside>
+      {/* Calculator (Figma: node-id=1209-39295) */}
+      <section
+        id='calculator'
+        className="relative z-10 -mt-24 pb-10 pt-0 sm:-mt-28 sm:pb-14 lg:-mt-[201px] before:absolute before:inset-x-0 before:bottom-0 before:top-24 before:bg-[#f6f9fc] before:content-[''] sm:before:top-28 lg:before:top-[201px]"
+      >
+        <div className='relative mx-auto w-full max-w-[1280px] px-4 sm:px-5 lg:px-8'>
+          <div className='relative mx-auto w-full max-w-[1216px]'>
+            <OfficeSpaceCalculatorCard />
+          </div>
         </div>
-      </main>
+      </section>
 
       {/* FAQ section (Figma: node-id=1360-9137) */}
       <FaqSection faqItems={faqItems} />
