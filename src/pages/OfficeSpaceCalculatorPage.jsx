@@ -6,68 +6,39 @@ import { Minus, Plus } from 'lucide-react';
 
 import mainBg from '@/assets/Main.jpg';
 import faqBg from '@/assets/faq.png';
-
+import illustration from '@/assets/illustation.png';
+import FaqSection from '@/components/sections/FaqSection';
 export default function OfficeSpaceCalculatorPage() {
-  function FaqAccordion({ items }) {
-    const [openIdx, setOpenIdx] = useState(0);
-
-    return (
-      <div className='divide-y divide-white/10'>
-        {items.map((item, idx) => {
-          const isOpen = idx === openIdx;
-          const contentId = `faq-panel-${idx}`;
-          return (
-            <div key={item.q} className='py-5'>
-              <button
-                type='button'
-                className='flex w-full items-center justify-between gap-6 text-left'
-                aria-expanded={isOpen}
-                aria-controls={contentId}
-                onClick={() => setOpenIdx((v) => (v === idx ? -1 : idx))}
-              >
-                <span className='text-[18px] font-semibold leading-7 text-white'>{item.q}</span>
-                <span className='inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/85'>
-                  {isOpen ? (
-                    <Minus className='h-4 w-4' aria-hidden='true' />
-                  ) : (
-                    <Plus className='h-4 w-4' aria-hidden='true' />
-                  )}
-                </span>
-              </button>
-
-              <div
-                id={contentId}
-                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
-                  isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                }`}
-              >
-                <div className='overflow-hidden'>
-                  <p className='mt-3 max-w-[70ch] text-[16px] leading-7 text-white/75'>{item.a}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  const faqs = [
+  const faqItems = [
     {
-      q: 'How does the Office Space Calculator work?',
-      a: 'Enter your team size and workplace preferences. The calculator estimates the total area and helps you understand how different room mixes impact space efficiency.',
+      question: 'Is there a free trial available?',
+      answer:
+        "Yes, you can try us for free for 30 days. If you want, we'll onboarding you with all the tools and guide you through the project setup. We're here to help you get started as soon as possible.",
     },
     {
-      q: 'What inputs do I need to provide?',
-      a: 'Typically: team size, workstyle (hybrid / fixed seating), meeting needs, and any special zones (reception, pantry, collaboration). You can refine later based on your exact requirements.',
+      question: 'Can I change my plan later?',
+      answer:
+        "Of course! You can upgrade or downgrade your plan at any time. Changes to your plan will be reflected immediately, and you'll only be charged for the difference.",
     },
     {
-      q: 'Is the estimate accurate for every office?',
-      a: 'It’s a planning estimate. Final area depends on layout, circulation, building constraints, and your room standards. Use it to benchmark and then validate with a detailed layout.',
+      question: 'What is your cancellation policy?',
+      answer:
+        "You can cancel your subscription at any time. Your subscription will remain active until the end of your current billing period, and you won't be charged again.",
     },
     {
-      q: 'Can you help us design and build the office?',
-      a: 'Yes. Phi Designs can take you from strategy and space planning to design, execution, and handover.',
+      question: 'Can other info be added to an invoice?',
+      answer:
+        'Yes, you can add additional information to your invoices such as PO numbers, tax IDs, or any other custom fields you need. Contact our support team to set this up.',
+    },
+    {
+      question: 'How does billing work?',
+      answer:
+        "We bill monthly or annually depending on your preference. You'll receive an invoice at the beginning of each billing period, and your card will be charged automatically.",
+    },
+    {
+      question: 'How do I change my account email?',
+      answer:
+        "You can change your account email from your account settings. Navigate to Settings > Account > Email and update your email address. You'll receive a confirmation email to verify the change.",
     },
   ];
   return (
@@ -112,8 +83,6 @@ export default function OfficeSpaceCalculatorPage() {
               </a>
             </div>
           </div>
-
-          {/* Dashed guideline + center mark */}
         </div>
       </section>
 
@@ -151,28 +120,17 @@ export default function OfficeSpaceCalculatorPage() {
       </main>
 
       {/* FAQ section (Figma: node-id=1360-9137) */}
-      <section
-        className='relative overflow-hidden text-white'
-        style={{
-          backgroundImage: `url(${faqBg})`,
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'cover',
-        }}
-      >
-        <div className='mx-auto w-full max-w-[1440px] px-4 py-16 sm:px-6 lg:px-[112px] lg:py-[120px]'>
-          <div className='grid gap-10 lg:grid-cols-[520px_1fr] lg:gap-16'>
-            <div className='flex flex-col lg:pr-12 lg:border-r lg:border-white/10'>
-              <h2 className='text-balance text-[44px] font-semibold leading-[104%] tracking-[-2px] text-white sm:text-[56px] lg:text-[64px] lg:tracking-[-3px]'>
-                Frequently
-                <br />
-                asked questions
-              </h2>
-            </div>
+      <FaqSection faqItems={faqItems} />
 
-            <div className='rounded-[20px] border border-white/12 bg-white/[0.05] px-6 py-3 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:px-8 sm:py-4'>
-              <FaqAccordion items={faqs} />
-            </div>
+      <section className='py-0 bg-white border-t border-neutral-200'>
+        <div className='container mx-auto px-6'>
+          <div className='py-8'>
+            <img
+              src={illustration}
+              alt='Office workspace illustration'
+              loading='lazy'
+              className='w-full h-auto'
+            />
           </div>
         </div>
       </section>

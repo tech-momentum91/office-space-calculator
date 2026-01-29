@@ -7,6 +7,13 @@ import { store } from './store/store';
 import routes from './routes';
 import AppErrorBoundary from './components/error-boundaries/AppErrorBoundary';
 import { validateEnv } from './utils/env-validation';
+import '@fontsource/plus-jakarta-sans/300.css';
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/500.css';
+import '@fontsource/plus-jakarta-sans/600.css';
+import '@fontsource/plus-jakarta-sans/700.css';
+import '@fontsource/plus-jakarta-sans/800.css';
+
 import './index.css';
 
 // Validate environment variables on startup
