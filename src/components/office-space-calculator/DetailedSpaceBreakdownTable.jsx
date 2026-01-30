@@ -11,9 +11,11 @@ import {
 } from '@/components/ui/select';
 import { ChevronDown, ChevronUp, Coffee, DownloadCloud, Plus } from 'lucide-react';
 import * as React from 'react';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
 import chairIcon from '@/assets/svg/chair-01.svg';
 import monitorIcon from '@/assets/svg/monitor-05.svg';
+
 function formatSqft(n) {
   return `${Math.round(n).toLocaleString()} sq ft.`;
 }
@@ -21,6 +23,10 @@ function formatSqft(n) {
 function parseCount(raw, fallback = 0) {
   const n = typeof raw === 'string' ? Number.parseInt(raw, 10) : Number.NaN;
   return Number.isFinite(n) ? n : fallback;
+}
+
+function toRowKey(groupKey, roomType) {
+  return `${groupKey}:${roomType}`;
 }
 
 function getGroupStyles(variant) {
@@ -56,191 +62,85 @@ function toGroupLabel(areaGroup) {
   return areaGroup === 'Productivity Area' ? 'Production Area' : areaGroup;
 }
 
-function GroupRow({ areaGroup, subtotalSqft, variant, isOpen, onToggle, showChevron }) {
-  const styles = getGroupStyles(variant);
-  return (
-    <Table.Row
-      className={cn(
-        'border-b border-[#eaecf0]',
-        styles.rowBg,
-        showChevron ? 'cursor-pointer' : null,
-      )}
-      onClick={() => {
-        if (!showChevron) return;
-        onToggle?.();
-      }}
-    >
-      <Table.Cell className='h-[40px] py-0 px-6'>
-        <div className='flex items-center gap-2'>
-          <span
-            className={cn(
-              'inline-flex h-5 w-5 items-center justify-center rounded-full border-[0.417px]',
-              styles.iconWrap,
-            )}
-          >
-            {styles.icon}
-          </span>
-          <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
-            {toGroupLabel(areaGroup)}
-          </span>
-        </div>
-      </Table.Cell>
-      <Table.Cell className='h-[40px] py-0 px-6' />
-      <Table.Cell className='h-[40px] py-0 px-6' />
-      <Table.Cell className='h-[40px] py-0 px-6' />
-      <Table.Cell className='h-[40px] p-0'>
-        <div className="flex h-[40px] items-center justify-end px-6 text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif] whitespace-nowrap">
-          {formatSqft(subtotalSqft)}
-        </div>
-      </Table.Cell>
-      <Table.Cell className='h-[40px] py-0 px-4 text-right'>
-        {showChevron ? (
-          <button
-            type='button'
-            className='inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5'
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle?.();
-            }}
-            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
-          >
-            {isOpen ? (
-              <ChevronUp className='h-4 w-4 text-[#475467]' aria-hidden='true' />
-            ) : (
-              <ChevronDown className='h-4 w-4 text-[#475467]' aria-hidden='true' />
-            )}
-          </button>
-        ) : null}
-      </Table.Cell>
-    </Table.Row>
-  );
-}
+function buildTableData(breakdownRows, grandTotalSqft, overrides) {
+  const out = [];
 
-function DataRow({
-  name,
-  layout,
-  onLayoutChange,
-  count,
-  onCountChange,
-  countEditable = false,
-  areaPerUnit,
-  total,
-}) {
-  return (
-    <Table.Row className='border-b border-[#eaecf0] bg-white'>
-      {/* Room Type (Figma 1209:36586: px-6 py-4, Inter 14/20 medium) */}
-      <Table.Cell className='p-0'>
-        <div className="flex items-center px-6 text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
-          {name}
-        </div>
-      </Table.Cell>
+  for (const group of breakdownRows ?? []) {
+    const groupKey = group.areaGroup;
+    const groupLabel = toGroupLabel(groupKey);
+    const variant = toVariant(groupKey);
 
-      {/* Space Type */}
-      <Table.Cell className='p-0 min-w-0'>
-        <div className='flex items-center px-6'>
-          <Select value={layout} onValueChange={onLayoutChange}>
-            <SelectTrigger
-              className={cn(
-                // Figma badge (1209:36615)
-                "h-[30px] w-[117px] justify-center gap-[20px] rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] font-['Inter',sans-serif] shadow-none",
-                'focus:ring-0 focus:ring-offset-0',
-                '[&>span]:truncate [&>span]:text-center [&>span]:text-[14px] [&>span]:font-medium [&>span]:leading-[18px] [&>span]:text-[#344054]',
-                '[&>svg]:opacity-100 [&>svg]:text-[#344054]',
-              )}
-              aria-label={`Space type for ${name}`}
-            >
-              <SelectValue placeholder='Select' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='Compact'>Compact</SelectItem>
-              <SelectItem value='Standard'>Standard</SelectItem>
-              <SelectItem value='Lavish'>Lavish</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </Table.Cell>
+    if (groupKey === 'Circulation Area') {
+      // Figma: Circulation is not expandable and has no add-room row.
+      out.push({
+        id: `group:${groupKey}`,
+        type: 'group',
+        groupKey,
+        variant,
+        roomType: groupLabel,
+        totalArea: group.subtotal ?? 0,
+      });
+      continue;
+    }
 
-      {/* Count */}
-      <Table.Cell className='p-0 min-w-0'>
-        <div className='flex items-center py-2'>
-          {countEditable ? (
-            <input
-              className="h-[30px] w-[117px] rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] text-[14px] font-medium leading-[18px] text-[#101828] shadow-[0px_1px_2px_rgba(16,24,40,0.05)] outline-none font-['Inter',sans-serif]"
-              value={count}
-              onChange={(e) => onCountChange?.(e.target.value)}
-              inputMode='numeric'
-              pattern='[0-9]*'
-              aria-label={`Count for ${name}`}
-            />
-          ) : (
-            <div className="flex h-[30px] w-[117px] items-center rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] shadow-[0px_1px_2px_rgba(16,24,40,0.05)] font-['Inter',sans-serif]">
-              <span className='truncate text-[14px] font-medium leading-[18px] text-[#101828]'>
-                {count}
-              </span>
-            </div>
-          )}
-        </div>
-      </Table.Cell>
+    const childRows = [];
+    for (const row of group.rows ?? []) {
+      const rowKey = toRowKey(groupKey, row.name);
+      const isProduction = groupKey === 'Productivity Area';
 
-      {/* Area Per Unit */}
-      <Table.Cell className='p-0'>
-        <div className="flex items-center px-6 py-4 text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif] whitespace-nowrap">
-          {formatSqft(areaPerUnit)}
-        </div>
-      </Table.Cell>
+      const countRaw = isProduction ? overrides?.countByRowKey?.[rowKey] : undefined;
+      const countStr = typeof countRaw === 'string' ? countRaw : String(row.count ?? '');
+      const countNum = isProduction ? parseCount(countStr, row.count ?? 0) : (row.count ?? 0);
 
-      {/* Total Area */}
-      <Table.Cell className='p-0'>
-        <div className="flex items-center px-6 py-4 text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif] whitespace-nowrap">
-          {formatSqft(total)}
-        </div>
-      </Table.Cell>
+      const spaceTypeRaw = overrides?.spaceTypeByRowKey?.[rowKey];
+      const spaceType = typeof spaceTypeRaw === 'string' ? spaceTypeRaw : (row.layout ?? 'Compact');
 
-      <Table.Cell className='p-0'>
-        <div className='px-4 py-4' />
-      </Table.Cell>
-    </Table.Row>
-  );
-}
+      childRows.push({
+        id: `row:${rowKey}`,
+        type: 'row',
+        groupKey,
+        rowKey,
+        roomType: row.name,
+        spaceType,
+        countStr,
+        countNum,
+        areaPerUnit: row.areaPerUnit ?? 0,
+        totalArea: countNum * (row.areaPerUnit ?? 0),
+      });
+    }
 
-function AddRoomRow() {
-  return (
-    <Table.Row className='border-b border-[#eaecf0] bg-[#fcfdfe]'>
-      <Table.Cell className='h-[48px] px-4 py-0'>
-        <button
-          type='button'
-          className="inline-flex items-center gap-2 rounded-[8px] px-3 py-2 text-[14px] font-semibold leading-[20px] text-[#475467] font-['Inter',sans-serif]"
-        >
-          <Plus className='h-5 w-5' aria-hidden='true' />
-          Add new Room
-        </button>
-      </Table.Cell>
-      <Table.Cell className='h-[48px] px-6 py-0' />
-      <Table.Cell className='h-[48px] px-6 py-0' />
-      <Table.Cell className='h-[48px] px-6 py-0' />
-      <Table.Cell className='h-[48px] px-6 py-0' />
-      <Table.Cell className='h-[48px] px-4 py-0' />
-    </Table.Row>
-  );
-}
+    const groupTotal = childRows.reduce((acc, r) => acc + (r.totalArea ?? 0), 0);
 
-function GrandTotalRow({ totalSqft }) {
-  return (
-    <Table.Row className='bg-[#f7f7f7]'>
-      <Table.Cell className="h-[72px] px-6 text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
-        Grand Total
-      </Table.Cell>
-      <Table.Cell className='h-[72px] px-3' />
-      <Table.Cell className='h-[72px] px-3' />
-      <Table.Cell className='h-[72px] px-3' />
-      <Table.Cell className='h-[72px] p-0'>
-        <div className="flex h-[72px] items-center px-3 text-[14px] font-semibold leading-[20px] text-[#101828] font-['Inter',sans-serif] whitespace-nowrap">
-          {formatSqft(totalSqft)}
-        </div>
-      </Table.Cell>
-      <Table.Cell className='h-[72px] px-4' />
-    </Table.Row>
-  );
+    out.push({
+      id: `group:${groupKey}`,
+      type: 'group',
+      groupKey,
+      variant,
+      roomType: groupLabel,
+      totalArea: groupTotal || group.subtotal || 0,
+    });
+
+    out.push(...childRows);
+
+    out.push({
+      id: `add:${groupKey}`,
+      type: 'add_room',
+      groupKey,
+    });
+  }
+
+  const groupsTotal = out
+    .filter((r) => r.type === 'group')
+    .reduce((acc, r) => acc + (r.totalArea ?? 0), 0);
+
+  out.push({
+    id: 'grand_total',
+    type: 'grand_total',
+    roomType: 'Grand Total',
+    totalArea: groupsTotal || grandTotalSqft || 0,
+  });
+
+  return out;
 }
 
 export default function DetailedSpaceBreakdownTable({
@@ -248,13 +148,6 @@ export default function DetailedSpaceBreakdownTable({
   grandTotalSqft,
   efficiencyOpportunitiesCount,
 }) {
-  const productionGroup = breakdownRows?.find((g) => g.areaGroup === 'Productivity Area');
-  const utilityGroup = breakdownRows?.find((g) => g.areaGroup === 'Utility and Breakout');
-  const circulationGroup = breakdownRows?.find((g) => g.areaGroup === 'Circulation Area');
-
-  const [isProductionOpen, setIsProductionOpen] = React.useState(true);
-  const [isUtilityOpen, setIsUtilityOpen] = React.useState(true);
-
   const [spaceTypeByRowKey, setSpaceTypeByRowKey] = React.useState(() => {
     const next = {};
     for (const group of breakdownRows ?? []) {
@@ -302,38 +195,254 @@ export default function DetailedSpaceBreakdownTable({
     });
   }, [breakdownRows]);
 
-  const productionSubtotal = React.useMemo(() => {
-    if (!productionGroup) return 0;
-    return (productionGroup.rows ?? []).reduce((acc, r) => {
-      const key = `${productionGroup.areaGroup}:${r.name}`;
-      const countNum = parseCount(countByRowKey[key], r.count ?? 0);
-      return acc + countNum * (r.areaPerUnit ?? 0);
-    }, 0);
-  }, [productionGroup, countByRowKey]);
+  const [expandedGroups, setExpandedGroups] = React.useState(() => ({
+    'Productivity Area': true,
+    'Utility and Breakout': true,
+  }));
 
-  const utilitySubtotal = React.useMemo(() => {
-    if (!utilityGroup) return 0;
-    return (utilityGroup.rows ?? []).reduce(
-      (acc, r) => acc + (r.count ?? 0) * (r.areaPerUnit ?? 0),
-      0,
-    );
-  }, [utilityGroup]);
+  const toggleGroup = React.useCallback((groupKey) => {
+    setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  }, []);
 
-  const circulationSubtotal = circulationGroup?.subtotal ?? 0;
+  const data = React.useMemo(
+    () =>
+      buildTableData(breakdownRows, grandTotalSqft, {
+        spaceTypeByRowKey,
+        countByRowKey,
+      }),
+    [breakdownRows, grandTotalSqft, spaceTypeByRowKey, countByRowKey],
+  );
 
-  const computedGrandTotal = React.useMemo(() => {
-    const hasAny = Boolean(productionGroup || utilityGroup || circulationGroup);
-    if (!hasAny) return grandTotalSqft ?? 0;
-    return productionSubtotal + utilitySubtotal + circulationSubtotal;
-  }, [
-    productionGroup,
-    utilityGroup,
-    circulationGroup,
-    grandTotalSqft,
-    productionSubtotal,
-    utilitySubtotal,
-    circulationSubtotal,
-  ]);
+  const visibleData = React.useMemo(() => {
+    const out = [];
+    for (const row of data) {
+      if (row.type === 'group' || row.type === 'grand_total') {
+        out.push(row);
+        continue;
+      }
+      if (row.groupKey && expandedGroups[row.groupKey]) out.push(row);
+    }
+    return out;
+  }, [data, expandedGroups]);
+
+  const columns = React.useMemo(
+    () => [
+      {
+        id: 'roomType',
+        header: 'Room Type',
+        cell: ({ row }) => {
+          const item = row.original;
+          if (item.type === 'group') {
+            const styles = getGroupStyles(item.variant);
+            return (
+              <div className='flex items-center gap-2'>
+                <span
+                  className={cn(
+                    'inline-flex h-5 w-5 items-center justify-center rounded-full border-[0.417px]',
+                    styles.iconWrap,
+                  )}
+                >
+                  {styles.icon}
+                </span>
+                <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                  {item.roomType}
+                </span>
+              </div>
+            );
+          }
+
+          if (item.type === 'add_room') {
+            return (
+              <button
+                type='button'
+                className="inline-flex items-center gap-2 rounded-[8px] px-3 py-2 text-[14px] font-semibold leading-[20px] text-[#475467] font-['Inter',sans-serif]"
+              >
+                <Plus className='h-5 w-5' aria-hidden='true' />
+                Add new Room
+              </button>
+            );
+          }
+
+          if (item.type === 'grand_total') {
+            return (
+              <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                Grand Total
+              </span>
+            );
+          }
+
+          return (
+            <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+              {item.roomType}
+            </span>
+          );
+        },
+        meta: { pad: 'px-6', rowPad: 'py-4' },
+      },
+      {
+        id: 'spaceType',
+        header: 'Space Type',
+        cell: ({ row, table }) => {
+          const item = row.original;
+          if (item.type !== 'row') return null;
+
+          const value =
+            table.options.meta?.spaceTypeByRowKey?.[item.rowKey] ?? item.spaceType ?? 'Compact';
+
+          return (
+            <Select
+              value={value}
+              onValueChange={(v) =>
+                table.options.meta?.setSpaceTypeByRowKey?.((prev) => ({
+                  ...prev,
+                  [item.rowKey]: v,
+                }))
+              }
+            >
+              <SelectTrigger
+                className={cn(
+                  // Figma badge (1209:36615)
+                  "h-[30px] w-[117px] justify-center gap-[20px] rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] font-['Inter',sans-serif] shadow-none",
+                  'focus:ring-0 focus:ring-offset-0',
+                  '[&>span]:truncate [&>span]:text-center [&>span]:text-[14px] [&>span]:font-medium [&>span]:leading-[18px] [&>span]:text-[#344054]',
+                  '[&>svg]:opacity-100 [&>svg]:text-[#344054]',
+                )}
+                aria-label={`Space type for ${item.roomType}`}
+              >
+                <SelectValue placeholder='Select' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='Compact'>Compact</SelectItem>
+                <SelectItem value='Standard'>Standard</SelectItem>
+                <SelectItem value='Lavish'>Lavish</SelectItem>
+              </SelectContent>
+            </Select>
+          );
+        },
+        meta: { pad: 'px-6', rowPad: 'py-4' },
+      },
+      {
+        id: 'count',
+        header: 'Count',
+        cell: ({ row, table }) => {
+          const item = row.original;
+          if (item.type !== 'row') return null;
+
+          const isProduction = item.groupKey === 'Productivity Area';
+          const value = isProduction
+            ? (table.options.meta?.countByRowKey?.[item.rowKey] ?? item.countStr ?? '')
+            : (item.countStr ?? '');
+
+          if (isProduction) {
+            return (
+              <input
+                className="h-[30px] w-[117px] rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] text-[14px] font-medium leading-[18px] text-[#101828] shadow-[0px_1px_2px_rgba(16,24,40,0.05)] outline-none font-['Inter',sans-serif]"
+                value={value}
+                onChange={(e) => {
+                  const nextVal = e.target.value.replaceAll(/\D/g, '');
+                  table.options.meta?.setCountByRowKey?.((prev) => ({
+                    ...prev,
+                    [item.rowKey]: nextVal,
+                  }));
+                }}
+                inputMode='numeric'
+                pattern='[0-9]*'
+                aria-label={`Count for ${item.roomType}`}
+              />
+            );
+          }
+
+          return (
+            <div className="flex h-[30px] w-[117px] items-center rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] shadow-[0px_1px_2px_rgba(16,24,40,0.05)] font-['Inter',sans-serif]">
+              <span className='truncate text-[14px] font-medium leading-[18px] text-[#101828]'>
+                {value}
+              </span>
+            </div>
+          );
+        },
+        meta: { pad: 'px-6', rowPad: 'py-4' },
+      },
+      {
+        id: 'areaPerUnit',
+        header: 'Area Per Unit',
+        cell: ({ row }) => {
+          const item = row.original;
+          if (item.type !== 'row') return null;
+          return (
+            <span className="text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif] whitespace-nowrap">
+              {formatSqft(item.areaPerUnit)}
+            </span>
+          );
+        },
+        meta: { pad: 'px-6', rowPad: 'py-4' },
+      },
+      {
+        id: 'totalArea',
+        header: 'Total Area',
+        cell: ({ row }) => {
+          const item = row.original;
+          if (item.type === 'group' || item.type === 'row' || item.type === 'grand_total') {
+            return (
+              <span
+                className={cn(
+                  "text-[14px] leading-[20px] font-['Inter',sans-serif] whitespace-nowrap",
+                  item.type === 'grand_total'
+                    ? 'font-semibold text-[#101828]'
+                    : 'font-medium text-[#475467]',
+                )}
+              >
+                {formatSqft(item.totalArea ?? 0)}
+              </span>
+            );
+          }
+          return null;
+        },
+        meta: { align: 'right', pad: 'px-6', rowPad: 'py-4' },
+      },
+      {
+        id: 'expand',
+        header: '',
+        cell: ({ row, table }) => {
+          const item = row.original;
+          if (item.type !== 'group') return null;
+          if (item.groupKey === 'Circulation Area') return null;
+
+          const isExpanded = Boolean(table.options.meta?.expandedGroups?.[item.groupKey]);
+          const Icon = isExpanded ? ChevronUp : ChevronDown;
+          return (
+            <button
+              type='button'
+              className='inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-black/5'
+              onClick={(e) => {
+                e.stopPropagation();
+                table.options.meta?.toggleGroup?.(item.groupKey);
+              }}
+              aria-label={isExpanded ? 'Collapse group' : 'Expand group'}
+            >
+              <Icon className='h-4 w-4 text-[#475467]' aria-hidden='true' />
+            </button>
+          );
+        },
+        meta: { align: 'right', pad: 'px-4', rowPad: 'py-0', width: 44 },
+      },
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: visibleData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+    meta: {
+      expandedGroups,
+      toggleGroup,
+      spaceTypeByRowKey,
+      setSpaceTypeByRowKey,
+      countByRowKey,
+      setCountByRowKey,
+    },
+  });
 
   return (
     <Card className='overflow-hidden rounded-[12px] border border-[#eaecf0] bg-white shadow-[0px_1px_2px_rgba(16,24,40,0.05)]'>
@@ -367,133 +476,82 @@ export default function DetailedSpaceBreakdownTable({
           <col style={{ width: '44px' }} />
         </colgroup>
         <Table.Header>
-          <Table.Row className='bg-white'>
-            <Table.Head className="h-[44px] bg-white border-b border-[#eaecf0] px-6 py-3 text-left text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]">
-              Room Type
-            </Table.Head>
-            <Table.Head className="h-[44px] bg-white border-b border-[#eaecf0] px-6 py-3 text-left text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]">
-              Space Type
-            </Table.Head>
-            <Table.Head className="h-[44px] bg-white border-b border-[#eaecf0] py-3 text-left text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]">
-              Count
-            </Table.Head>
-            <Table.Head className='h-[44px] bg-white border-b border-[#eaecf0] p-0'>
-              <div className="flex h-[44px] items-center px-6 py-3 text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]">
-                Area Per Unit
-              </div>
-            </Table.Head>
-            <Table.Head className='h-[44px] bg-white border-b border-[#eaecf0] p-0'>
-              <div className="flex h-[44px] items-center px-6 py-3 text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]">
-                Total Area
-              </div>
-            </Table.Head>
-            <Table.Head className='h-[44px] bg-white border-b border-[#eaecf0] px-4 py-3' />
-          </Table.Row>
+          {table.getHeaderGroups().map((hg) => (
+            <Table.Row key={hg.id} className='bg-white'>
+              {hg.headers.map((header) => {
+                const meta = header.column.columnDef.meta || {};
+                return (
+                  <Table.Head
+                    key={header.id}
+                    className={cn(
+                      "h-[44px] bg-white border-b border-[#eaecf0] py-3 text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]",
+                      meta.align === 'right' ? 'text-right' : 'text-left',
+                      meta.pad ?? 'px-6',
+                    )}
+                    style={meta.width ? { width: meta.width } : undefined}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </Table.Head>
+                );
+              })}
+            </Table.Row>
+          ))}
         </Table.Header>
 
         <Table.Body>
-          {productionGroup ? (
-            <>
-              <GroupRow
-                areaGroup={productionGroup.areaGroup}
-                subtotalSqft={productionSubtotal || productionGroup.subtotal}
-                variant={toVariant(productionGroup.areaGroup)}
-                showChevron
-                isOpen={isProductionOpen}
-                onToggle={() => setIsProductionOpen((v) => !v)}
-              />
-              {isProductionOpen ? (
-                <>
-                  {productionGroup.rows.map((r) => (
-                    <DataRow
-                      key={`prod-${r.name}`}
-                      name={r.name}
-                      layout={
-                        spaceTypeByRowKey[`${productionGroup.areaGroup}:${r.name}`] ??
-                        r.layout ??
-                        'Compact'
-                      }
-                      onLayoutChange={(v) => {
-                        setSpaceTypeByRowKey((prev) => ({
-                          ...prev,
-                          [`${productionGroup.areaGroup}:${r.name}`]: v,
-                        }));
-                      }}
-                      count={
-                        countByRowKey[`${productionGroup.areaGroup}:${r.name}`] ??
-                        String(r.count ?? '')
-                      }
-                      onCountChange={(nextVal) => {
-                        setCountByRowKey((prev) => ({
-                          ...prev,
-                          [`${productionGroup.areaGroup}:${r.name}`]: nextVal.replaceAll(/\D/g, ''),
-                        }));
-                      }}
-                      countEditable
-                      areaPerUnit={r.areaPerUnit}
-                      total={
-                        parseCount(
-                          countByRowKey[`${productionGroup.areaGroup}:${r.name}`],
-                          r.count ?? 0,
-                        ) * (r.areaPerUnit ?? 0)
-                      }
-                    />
-                  ))}
-                  <AddRoomRow />
-                </>
-              ) : null}
-            </>
-          ) : null}
+          {table.getRowModel().rows.map((row) => {
+            const item = row.original;
+            const isExpandableGroup = item.type === 'group' && item.groupKey !== 'Circulation Area';
 
-          {utilityGroup ? (
-            <>
-              <GroupRow
-                areaGroup={utilityGroup.areaGroup}
-                subtotalSqft={utilitySubtotal || utilityGroup.subtotal}
-                variant={toVariant(utilityGroup.areaGroup)}
-                showChevron
-                isOpen={isUtilityOpen}
-                onToggle={() => setIsUtilityOpen((v) => !v)}
-              />
-              {isUtilityOpen ? (
-                <>
-                  {utilityGroup.rows.map((r) => (
-                    <DataRow
-                      key={`util-${r.name}`}
-                      name={r.name}
-                      layout={
-                        spaceTypeByRowKey[`${utilityGroup.areaGroup}:${r.name}`] ??
-                        r.layout ??
-                        'Compact'
-                      }
-                      onLayoutChange={(v) => {
-                        setSpaceTypeByRowKey((prev) => ({
-                          ...prev,
-                          [`${utilityGroup.areaGroup}:${r.name}`]: v,
-                        }));
-                      }}
-                      count={String(r.count ?? '')}
-                      areaPerUnit={r.areaPerUnit}
-                      total={(r.count ?? 0) * (r.areaPerUnit ?? 0)}
-                    />
-                  ))}
-                  <AddRoomRow />
-                </>
-              ) : null}
-            </>
-          ) : null}
+            const rowClassName =
+              item.type === 'group'
+                ? cn('border-b border-[#eaecf0]', getGroupStyles(item.variant).rowBg)
+                : item.type === 'add_room'
+                  ? 'border-b border-[#eaecf0] bg-[#fcfdfe]'
+                  : item.type === 'grand_total'
+                    ? 'bg-[#f7f7f7]'
+                    : 'border-b border-[#eaecf0] bg-white';
 
-          {circulationGroup ? (
-            <GroupRow
-              areaGroup={circulationGroup.areaGroup}
-              subtotalSqft={circulationGroup.subtotal}
-              variant={toVariant(circulationGroup.areaGroup)}
-              showChevron={false}
-              isOpen={false}
-            />
-          ) : null}
+            const rowHeightClass =
+              item.type === 'group'
+                ? 'h-[40px]'
+                : item.type === 'add_room'
+                  ? 'h-[48px]'
+                  : 'h-[72px]';
 
-          <GrandTotalRow totalSqft={computedGrandTotal} />
+            return (
+              <Table.Row
+                key={row.id}
+                className={cn(rowClassName, isExpandableGroup ? 'cursor-pointer' : null)}
+                onClick={() => {
+                  if (!isExpandableGroup) return;
+                  toggleGroup(item.groupKey);
+                }}
+              >
+                {row.getVisibleCells().map((cell) => {
+                  const meta = cell.column.columnDef.meta || {};
+                  const alignClass = meta.align === 'right' ? 'text-right' : 'text-left';
+                  const pad = cell.column.id === 'count' ? 'px-3' : (meta.pad ?? 'px-6');
+                  const rowPad =
+                    item.type === 'group'
+                      ? 'py-0'
+                      : item.type === 'add_room'
+                        ? 'py-0'
+                        : (meta.rowPad ?? 'py-4');
+                  return (
+                    <Table.Cell
+                      key={cell.id}
+                      className={cn(rowHeightClass, alignClass, pad, rowPad)}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </Table.Cell>
+                  );
+                })}
+              </Table.Row>
+            );
+          })}
         </Table.Body>
       </Table.Root>
     </Card>
