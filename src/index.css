@@ -140,6 +140,8 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Prevent layout shift when popovers/dropdowns appear */
+  scrollbar-gutter: stable;
 }
 
 body {

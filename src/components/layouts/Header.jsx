@@ -1,5 +1,9 @@
-import { useId, useEffect, useState } from 'react';
-import { Phone } from 'lucide-react';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { CloudDownload, Phone, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import mainBg from '@/assets/Main.jpg';
 
 /**
  * Header Component
@@ -10,6 +14,35 @@ export default function Header() {
   const menuId = useId();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { pathname } = useLocation();
+  const isDetailsSpaceAnalysisPage = pathname === '/details-space-analysis';
+
+  async function handleShareReport() {
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, url });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied');
+        return;
+      }
+
+      window.prompt('Copy this link:', url);
+    } catch {
+      toast.error('Could not share report');
+    }
+  }
+
+  function handleDownloadPdf() {
+    // Basic "Download PDF" flow without extra dependencies:
+    // user can choose "Save as PDF" in the browser print dialog.
+    window.print();
+  }
 
   // Close on Escape
   useEffect(() => {
@@ -20,6 +53,13 @@ export default function Header() {
     if (isMenuOpen) window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isMenuOpen]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    // Avoid setting state synchronously inside effect (eslint: react-hooks/set-state-in-effect)
+    const t = window.setTimeout(() => setIsMenuOpen(false), 0);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
 
   // Add background on scroll (fixed header)
   useEffect(() => {
@@ -39,15 +79,31 @@ export default function Header() {
     { label: 'Resources', href: '/resources' },
   ];
 
+  const headerStyle = useMemo(() => {
+    if (!isDetailsSpaceAnalysisPage) return undefined;
+    return {
+      backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${mainBg})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      backgroundAttachment: 'fixed',
+    };
+  }, [isDetailsSpaceAnalysisPage]);
+
+  const headerClassName = isDetailsSpaceAnalysisPage
+    ? 'border-b border-white/10'
+    : isScrolled
+      ? 'bg-black/70 backdrop-blur-md border-b border-white/10'
+      : 'bg-transparent';
+
   return (
     <>
       {/* Spacer so page content doesn't sit under fixed header */}
       <div className='h-[84px]' aria-hidden='true' />
 
       <header
-        className={`fixed inset-x-0 top-0 z-50 w-full transition-colors ${
-          isScrolled ? 'bg-black/70 backdrop-blur-md border-b border-white/10' : 'bg-transparent'
-        }`}
+        className={`fixed inset-x-0 top-0 z-50 w-full transition-colors ${headerClassName}`}
+        style={headerStyle}
       >
         <div className='mx-auto w-full max-w-[1280px] px-4 py-[18px] sm:px-5 lg:px-[32px]'>
           <div className='flex items-center justify-between'>
@@ -64,90 +120,121 @@ export default function Header() {
               </a>
 
               {/* Desktop nav */}
-              <nav className='hidden lg:block' aria-label='primary'>
-                <ul className='flex items-center gap-2 mx-[30px]'>
-                  {navItems.map((item) => (
+              {isDetailsSpaceAnalysisPage ? null : (
+                <nav className='hidden lg:block' aria-label='primary'>
+                  <ul className='flex items-center gap-2 mx-[30px]'>
+                    {navItems.map((item) => (
+                      <li key={item.href}>
+                        <a
+                          href={item.href}
+                          className='mx-[5px] px-[10px] py-[5px] text-[15px] font-medium leading-[24.3px] tracking-[0.1px] text-[#d2d3da] no-underline transition-colors hover:text-white'
+                        >
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+            </div>
+
+            {/* Right actions */}
+            <div className='flex items-center gap-4'>
+              {isDetailsSpaceAnalysisPage ? (
+                <>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    className='h-12 rounded-[8px] border-[rgba(27,9,78,0.04)] bg-white px-6 text-[15px] font-bold text-[#3c4fb7] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:bg-white'
+                    onClick={handleShareReport}
+                  >
+                    <Share2 className='h-4 w-4' aria-hidden='true' />
+                    Share Report
+                  </Button>
+                  <Button
+                    type='button'
+                    variant='gradient'
+                    className='h-12 rounded-[8px] px-6'
+                    onClick={handleDownloadPdf}
+                  >
+                    <CloudDownload className='h-4 w-4' aria-hidden='true' />
+                    Download PDF
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <a
+                    href='/contact-us'
+                    className='hidden h-[48px] items-center justify-center rounded-[8px] border border-[#1b094e0a] bg-white px-[47px] py-[12px] text-center text-[15px] font-bold leading-[24px] text-[#3c4fb7] shadow-[0_1px_2px_#0000000d] transition-all duration-300 hover:bg-[linear-gradient(#00000026,#00000026)] lg:inline-flex'
+                  >
+                    Contact us
+                  </a>
+
+                  <a
+                    href='tel:+9199998001667'
+                    className='hidden h-[48px] items-center justify-center gap-2 rounded-[8px] border border-white/20 px-[25px] py-[12px] text-center text-[15px] font-bold leading-[24px] text-white shadow-[0_1px_2px_#0000000d] transition-all duration-300 hover:opacity-95 lg:inline-flex'
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(90deg, #0D47A1 0%, #0058A6 20%, #0066A4 40%, #00729E 60%, #007E97 80%, #00888F 100%)',
+                    }}
+                    aria-label='Call +91 99998 001667'
+                  >
+                    <span className='inline-flex h-6 w-6 items-center justify-center'>
+                      <Phone className='h-[18px] w-[18px] text-white' aria-hidden='true' />
+                    </span>
+                    <span className='tracking-[0.2px]'>+9199998001667</span>
+                  </a>
+                </>
+              )}
+
+              {/* Mobile menu button */}
+              {isDetailsSpaceAnalysisPage ? null : (
+                <button
+                  type='button'
+                  className={`inline-flex items-center justify-center rounded-md px-[10px] py-2 text-[36px] leading-none lg:hidden ${
+                    isMenuOpen ? 'bg-[#1e6bd8] text-white' : 'bg-transparent text-white'
+                  }`}
+                  aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                  aria-controls={menuId}
+                  aria-haspopup='menu'
+                  aria-expanded={isMenuOpen}
+                  onClick={() => setIsMenuOpen((v) => !v)}
+                >
+                  <img
+                    src='https://cdn.prod.website-files.com/664326cc68f40127d59c2683/685a98368529729d83382a10_List.svg'
+                    loading='lazy'
+                    alt=''
+                    className='h-7 w-7'
+                  />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile menu */}
+          {isDetailsSpaceAnalysisPage ? null : (
+            <div id={menuId} role='menu' className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
+              <div className='mt-4 rounded-xl bg-white py-10'>
+                <ul className='flex flex-col items-center gap-3'>
+                  {[
+                    ...navItems,
+                    { label: 'Contact us', href: '/contact-us' },
+                    { label: 'Call +9199998001667', href: 'tel:+9199998001667' },
+                  ].map((item) => (
                     <li key={item.href}>
                       <a
                         href={item.href}
-                        className='mx-[5px] px-[10px] py-[5px] text-[15px] font-medium leading-[24.3px] tracking-[0.1px] text-[#d2d3da] no-underline transition-colors hover:text-white'
+                        className='px-[10px] py-[10px] text-[15px] font-medium leading-6 text-[#101828] no-underline transition-colors hover:text-[#3c4fb7]'
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         {item.label}
                       </a>
                     </li>
                   ))}
                 </ul>
-              </nav>
+              </div>
             </div>
-
-            {/* Right actions */}
-            <div className='flex items-center gap-4'>
-              <a
-                href='/contact-us'
-                className='hidden h-[48px] items-center justify-center rounded-[8px] border border-[#1b094e0a] bg-white px-[47px] py-[12px] text-center text-[15px] font-bold leading-[24px] text-[#3c4fb7] shadow-[0_1px_2px_#0000000d] transition-all duration-300 hover:bg-[linear-gradient(#00000026,#00000026)] lg:inline-flex'
-              >
-                Contact us
-              </a>
-
-              <a
-                href='tel:+9199998001667'
-                className='hidden h-[48px] items-center justify-center gap-2 rounded-[8px] border border-white/20 px-[25px] py-[12px] text-center text-[15px] font-bold leading-[24px] text-white shadow-[0_1px_2px_#0000000d] transition-all duration-300 hover:opacity-95 lg:inline-flex'
-                style={{
-                  backgroundImage:
-                    'linear-gradient(90deg, #0D47A1 0%, #0058A6 20%, #0066A4 40%, #00729E 60%, #007E97 80%, #00888F 100%)',
-                }}
-                aria-label='Call +91 99998 001667'
-              >
-                <span className='inline-flex h-6 w-6 items-center justify-center'>
-                  <Phone className='h-[18px] w-[18px] text-white' aria-hidden='true' />
-                </span>
-                <span className='tracking-[0.2px]'>+9199998001667</span>
-              </a>
-
-              {/* Mobile menu button */}
-              <button
-                type='button'
-                className={`inline-flex items-center justify-center rounded-md px-[10px] py-2 text-[36px] leading-none lg:hidden ${
-                  isMenuOpen ? 'bg-[#1e6bd8] text-white' : 'bg-transparent text-white'
-                }`}
-                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-                aria-controls={menuId}
-                aria-haspopup='menu'
-                aria-expanded={isMenuOpen}
-                onClick={() => setIsMenuOpen((v) => !v)}
-              >
-                <img
-                  src='https://cdn.prod.website-files.com/664326cc68f40127d59c2683/685a98368529729d83382a10_List.svg'
-                  loading='lazy'
-                  alt=''
-                  className='h-7 w-7'
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile menu */}
-          <div id={menuId} role='menu' className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
-            <div className='mt-4 rounded-xl bg-white py-10'>
-              <ul className='flex flex-col items-center gap-3'>
-                {[
-                  ...navItems,
-                  { label: 'Contact us', href: '/contact-us' },
-                  { label: 'Call +9199998001667', href: 'tel:+9199998001667' },
-                ].map((item) => (
-                  <li key={item.href}>
-                    <a
-                      href={item.href}
-                      className='px-[10px] py-[10px] text-[15px] font-medium leading-6 text-[#101828] no-underline transition-colors hover:text-[#3c4fb7]'
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          )}
         </div>
       </header>
     </>

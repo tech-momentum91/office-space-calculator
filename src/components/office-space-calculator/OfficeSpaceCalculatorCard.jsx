@@ -28,71 +28,12 @@ import {
   calculatorSchema,
   zodIssuesToFieldErrors,
 } from '@/schemas/office-space-calculator/calculatorSchema';
+import { calcResults, normalizeForCalc } from '@/utils/office-space-calculator/calcResults';
 
 function formatLayoutLabel(layoutType) {
   if (layoutType === 'compact') return 'Compact Office';
   if (layoutType === 'standard') return 'Standard Office';
   return 'Lavish Office';
-}
-
-function roundToNearest10(n) {
-  return Math.round(n / 10) * 10;
-}
-
-function calcResults(data) {
-  const workstations = Number(data?.workstationsRequired ?? 0) || 0;
-  const meetingRooms = Number(data?.meetingRooms ?? 0) || 0;
-  const leadershipCabins = Number(data?.leadershipCabins ?? 0) || 0;
-  const managerCabins = Number(data?.managerCabins ?? 0) || 0;
-  const existing =
-    data?.existingCarpetArea === undefined ? undefined : Number(data.existingCarpetArea) || 0;
-
-  const spacePerPerson =
-    data?.layoutType === 'lavish' ? 90 : data?.layoutType === 'compact' ? 70 : 77;
-
-  const base =
-    workstations * spacePerPerson + meetingRooms * 30 + leadershipCabins * 50 + managerCabins * 40;
-
-  const estimatedSpaceNeeded = roundToNearest10(base * 1.15);
-  const delta =
-    existing === undefined ? undefined : roundToNearest10(estimatedSpaceNeeded - existing);
-
-  const seatingSqft = Math.round(workstations * 40.77); // matches Figma sample: 30 -> 1223
-
-  const productivitySqft = Math.round((estimatedSpaceNeeded * 55) / 100);
-  const utilitySqft = Math.round((estimatedSpaceNeeded * 30) / 100);
-  // Requirement: Circulation area (15%) = 15% of (Productivity area + Utility area)
-  const circulationSqft = Math.round(((productivitySqft + utilitySqft) * 15) / 100);
-
-  const zonal = [
-    { label: 'Productivity', pct: 55, sqft: productivitySqft },
-    { label: 'Utility', pct: 30, sqft: utilitySqft },
-    { label: 'Circulation space', pct: 15, sqft: circulationSqft },
-  ];
-
-  const collaboration = [
-    { label: 'Meeting Room', count: meetingRooms, sqft: Math.round(meetingRooms * 30) },
-    { label: 'Manager Cabins', count: managerCabins, sqft: Math.round(managerCabins * 40) },
-    {
-      label: 'Leadership Cabins',
-      count: leadershipCabins,
-      sqft: Math.round(leadershipCabins * 50),
-    },
-  ];
-
-  return {
-    workstations,
-    meetingRooms,
-    leadershipCabins,
-    managerCabins,
-    existing,
-    spacePerPerson,
-    seatingSqft,
-    estimatedSpaceNeeded,
-    delta,
-    zonal,
-    collaboration,
-  };
 }
 
 function LeftMarketingPanel() {
@@ -136,26 +77,6 @@ function RightPanelShell({ children, showDivider = true }) {
       {children}
     </div>
   );
-}
-
-function normalizeForCalc(values) {
-  const workstationsRequired =
-    values?.workstationsRequired === '' || values?.workstationsRequired === undefined
-      ? 0
-      : Number(values.workstationsRequired);
-  const existingCarpetArea =
-    values?.existingCarpetArea === '' || values?.existingCarpetArea === undefined
-      ? undefined
-      : Number(values.existingCarpetArea);
-
-  return {
-    workstationsRequired: Number.isFinite(workstationsRequired) ? workstationsRequired : 0,
-    existingCarpetArea: Number.isFinite(existingCarpetArea) ? existingCarpetArea : undefined,
-    meetingRooms: Number(values?.meetingRooms ?? 0) || 0,
-    leadershipCabins: Number(values?.leadershipCabins ?? 0) || 0,
-    managerCabins: Number(values?.managerCabins ?? 0) || 0,
-    layoutType: values?.layoutType ?? 'compact',
-  };
 }
 
 export default function OfficeSpaceCalculatorCard() {

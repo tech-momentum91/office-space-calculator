@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 import rightpanelBg from '@/assets/image/rightpannel.png';
+import { useNavigate } from 'react-router-dom';
 
 const iconRuler = 'https://www.figma.com/api/mcp/asset/f80e462c-7173-406c-b374-f39953f35104';
 const iconArrowUp = 'https://www.figma.com/api/mcp/asset/f3990118-45a7-4a40-83e6-d8db6d55d0ee';
@@ -37,6 +38,8 @@ function formatTopSqft(value) {
 }
 
 export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
+  const navigate = useNavigate();
+
   return (
     <TooltipProvider>
       <div className='relative h-full w-[608px] overflow-hidden'>
@@ -255,7 +258,9 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                               sideOffset={8}
                               className='max-w-[260px] break-words'
                             >
-                              {row.count} ({row.sqft.toLocaleString()} sqft.)
+                              {typeof row.unitArea === 'number'
+                                ? `${row.count} × ${row.unitArea} = ${row.sqft.toLocaleString()} sqft.`
+                                : `${row.count} (${row.sqft.toLocaleString()} sqft.)`}
                             </TooltipContent>
                           </Tooltip>
                         </div>
@@ -277,6 +282,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           <button
             type='button'
             className='mx-auto mt-4 rounded-[8px] p-3 shadow-[0px_1px_2px_rgba(0,0,0,0.05)]'
+            onClick={() => navigate('/details-space-analysis')}
             style={{
               backgroundImage:
                 'linear-gradient(161.957deg, #0D47A1 8.4861%, #0058A6 25.092%, #0066A4 41.697%, #00729E 58.303%, #007E97 74.908%, #00888F 91.514%)',

@@ -9,6 +9,7 @@ const WelcomePage = lazyLoad(() => import('@/pages/WelcomePage'));
 const LoginPage = lazyLoad(() => import('@/pages/auth/LoginPage'));
 const DashboardPage = lazyLoad(() => import('@/pages/DashboardPage'));
 const OfficeSpaceCalculatorPage = lazyLoad(() => import('@/pages/OfficeSpaceCalculatorPage'));
+const DetailsSpaceAnalysisPage = lazyLoad(() => import('@/pages/DetailsSpaceAnalysisPage'));
 
 /**
  * Application routes configuration
@@ -41,6 +42,21 @@ const routes = [
         </Suspense>
       </RouteErrorBoundary>
     ),
+  },
+  {
+    path: '/details-space-analysis',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <DetailsSpaceAnalysisPage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+  // Alias for common misspelling
+  {
+    path: '/details-space-analaysis',
+    element: <Navigate to='/details-space-analysis' replace />,
   },
   {
     path: '*',
