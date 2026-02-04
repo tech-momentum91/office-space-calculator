@@ -33,12 +33,23 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const webflowBaseRaw = import.meta.env.PHI_WEBFLOW_URL ?? '';
+  const webflowBase = webflowBaseRaw
+    ? (webflowBaseRaw.startsWith('http') ? webflowBaseRaw : `https://${webflowBaseRaw}`).replace(
+      /\/$/,
+      '',
+    )
+    : '';
+
   const navItems = [
-    { label: 'About', href: '/about-us' },
-    { label: 'Portfolio', href: '/portfolio' },
-    { label: 'Walkthroughs', href: '/virtual-walkthroughs' },
-    { label: 'Resources', href: '/resources' },
-  ];
+    { label: 'About', path: 'about-us' },
+    { label: 'Portfolio', path: 'portfolio' },
+    { label: 'Walkthroughs', path: 'virtual-walkthroughs' },
+    { label: 'Resources', path: 'resources' },
+  ].map((item) => ({
+    ...item,
+    href: webflowBase ? `${webflowBase}/${item.path}` : `/${item.path}`,
+  }));
 
   const headerStyle = useMemo(() => {
     if (!isDetailsSpaceAnalysisPage) return undefined;
@@ -85,7 +96,7 @@ export default function Header() {
                 <nav className='hidden lg:block' aria-label='primary'>
                   <ul className='flex items-center gap-2 mx-[30px]'>
                     {navItems.map((item) => (
-                      <li key={item.href}>
+                      <li key={item.label}>
                         <a
                           href={item.href}
                           className='mx-[5px] px-[10px] py-[5px] text-[15px] font-medium leading-[24.3px] tracking-[0.1px] text-[#d2d3da] no-underline transition-colors hover:text-white'
