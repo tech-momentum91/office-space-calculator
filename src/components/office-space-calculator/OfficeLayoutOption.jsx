@@ -1,7 +1,23 @@
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-export default function OfficeLayoutOption({ selected, iconSrc, title, description, onClick }) {
+/**
+ * @param {Object} props
+ * @param {boolean} props.selected
+ * @param {string} [props.iconSrc] - Image URL/path for the layout icon (use with import)
+ * @param {React.ComponentType<{ className?: string }>} [props.icon] - Icon component (e.g. from lucide-react)
+ * @param {string} props.title
+ * @param {string} props.description
+ * @param {() => void} props.onClick
+ */
+export default function OfficeLayoutOption({
+  selected,
+  iconSrc,
+  icon: Icon,
+  title,
+  description,
+  onClick,
+}) {
   return (
     <Button
       type='button'
@@ -17,8 +33,12 @@ export default function OfficeLayoutOption({ selected, iconSrc, title, descripti
       <div className='flex w-full flex-col gap-[10px]'>
         {/* Figma node-id=1209:42097: 24px box with 16.25% inset */}
         <div className='relative size-6 overflow-hidden'>
-          <div className='absolute inset-[16.25%]'>
-            <img src={iconSrc} alt='' className='block h-full w-full max-w-none' />
+          <div className='absolute inset-[16.25%] flex items-center justify-center'>
+            {Icon ? (
+              <Icon className='size-6 shrink-0 text-[#021a32]' aria-hidden />
+            ) : iconSrc ? (
+              <img src={iconSrc} alt='' className='block size-6 object-contain' />
+            ) : null}
           </div>
         </div>
 

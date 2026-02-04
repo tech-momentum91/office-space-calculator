@@ -1,16 +1,17 @@
 import Footer from '@/components/layouts/Footer';
 import Header from '@/components/layouts/Header';
-import illustration from '@/assets/illustation.png';
+import illustration from '@/assets/image/illustation.png';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Coffee, Lightbulb } from 'lucide-react';
+import { RiBuildingLine } from 'react-icons/ri';
+import { LuMonitorSpeaker } from 'react-icons/lu';
+
 import { useSelector } from 'react-redux';
 import { selectOfficeCalculatorValues } from '@/store/slices/officeCalculatorSlice';
 import { calcResults, normalizeForCalc } from '@/utils/office-space-calculator/calcResults';
-import buildingIcon from '@/assets/svg/building-05.svg';
 import chairIcon from '@/assets/svg/chair-01.svg';
-import monitorIcon from '@/assets/svg/monitor-05.svg';
 import DetailedSpaceBreakdownTable from '@/components/office-space-calculator/DetailedSpaceBreakdownTable';
 
 function formatLayoutLabel(layoutType) {
@@ -188,7 +189,7 @@ export default function DetailsSpaceAnalysisPage() {
               unit='sqft.'
               gradient='linear-gradient(109deg, rgba(227, 235, 253, 0.00) -28.7%, #E3EBFD 216.83%)'
               iconWrapperClassName='bg-[#3c4fb7]'
-              icon={<img src={buildingIcon} alt='' aria-hidden='true' className='h-4 w-4' />}
+              icon={<RiBuildingLine className='h-4 w-4 text-white' aria-hidden='true' />}
             />
             <StatCard
               title='Seating Capacity'
@@ -214,7 +215,7 @@ export default function DetailsSpaceAnalysisPage() {
               unit='sqft.'
               gradient='linear-gradient(107deg, rgba(228, 247, 243, 0.00) -40.8%, #E4F7F3 100%)'
               iconWrapperClassName='bg-[#10a684] border-[0.667px] border-white'
-              icon={<img src={monitorIcon} alt='' aria-hidden='true' className='h-4 w-4' />}
+              icon={<LuMonitorSpeaker className='h-4 w-4 text-white' aria-hidden='true' />}
             />
             <StatCard
               title='Utility and Breakout'

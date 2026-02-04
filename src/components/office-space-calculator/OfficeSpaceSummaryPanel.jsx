@@ -3,10 +3,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 import rightpanelBg from '@/assets/image/rightpannel.png';
 import { useNavigate } from 'react-router-dom';
-import iconRuler from '@/assets/image/ruler.png';
-import iconArrowUp from '@/assets/image/ArrowUp.png';
-import iconArrowUpCta from '@/assets/image/sideArrow.png';
-import iconInfoSmall from '@/assets/image/info.png';
+import { RiRuler2Line } from 'react-icons/ri';
+import { BsFillInfoCircleFill } from 'react-icons/bs';
+import { FaArrowRight } from 'react-icons/fa';
+import { FiArrowUp } from 'react-icons/fi';
 
 const compactNumberFormatter = new Intl.NumberFormat('en-US', {
   notation: 'compact',
@@ -66,7 +66,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
               <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
                 <div className='relative size-6 overflow-hidden'>
                   <div className='absolute inset-[16.25%]'>
-                    <img src={iconRuler} alt='' className='block h-full w-full max-w-none' />
+                    <RiRuler2Line className='size-6 shrink-0 text-white' aria-hidden />
                   </div>
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                 <div
                   className={cn('relative size-6 shrink-0', results?.delta < 0 ? 'rotate-180' : '')}
                 >
-                  <img src={iconArrowUp} alt='' className='block h-full w-full max-w-none' />
+                  <FiArrowUp className='size-6 shrink-0 text-[#375DFB]' aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1 truncate text-center text-[14px] font-normal leading-[1.2] tracking-[-0.3584px] text-[#525866] font-['Plus_Jakarta_Sans',sans-serif]">
                   {results?.delta === undefined
@@ -151,10 +151,9 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                   <div className='flex items-center gap-1'>
                     <div className='relative size-6 overflow-hidden'>
                       <div className='absolute inset-[18.75%]'>
-                        <img
-                          src={iconInfoSmall}
-                          alt=''
-                          className='block h-full w-full max-w-none'
+                        <BsFillInfoCircleFill
+                          className='size-4 shrink-0 text-gray-400'
+                          aria-hidden
                         />
                       </div>
                     </div>
@@ -292,9 +291,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                 Explore Your Detailed Space Report
               </div>
               <div className='flex size-6 items-center justify-center'>
-                <div>
-                  <img src={iconArrowUpCta} alt='' className='block size-6 max-w-none' />
-                </div>
+                <FaArrowRight className='size-6 shrink-0 text-white' aria-hidden />
               </div>
             </div>
           </button>

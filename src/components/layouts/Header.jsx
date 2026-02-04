@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CloudDownload, Phone, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import mainBg from '@/assets/Main.jpg';
+import mainBg from '@/assets/image/Main.jpg';
 
 export default function Header() {
   const menuId = useId();

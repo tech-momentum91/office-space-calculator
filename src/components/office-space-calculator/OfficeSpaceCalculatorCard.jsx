@@ -11,10 +11,9 @@ import OfficeRangeSlider from '@/components/office-space-calculator/OfficeRangeS
 import OfficeLayoutOption from '@/components/office-space-calculator/OfficeLayoutOption';
 import OfficeSpaceSummaryPanel from '@/components/office-space-calculator/OfficeSpaceSummaryPanel';
 import OfficeSpaceFormPanel from '@/components/office-space-calculator/OfficeSpaceFormPanel';
-import iconInfo from '@/assets/image/info.png';
-import iconCompact from '@/assets/image/compact.png';
-import iconStandard from '@/assets/image/standard.png';
-import iconLavish from '@/assets/image/lavish.png';
+import { BsFillInfoCircleFill, BsGrid3X3GapFill } from 'react-icons/bs';
+import { RiLayoutGridFill, RiLayoutColumnFill } from 'react-icons/ri';
+
 import {
   clearErrors,
   selectOfficeCalculatorErrors,
@@ -208,7 +207,7 @@ export default function OfficeSpaceCalculatorCard() {
                       </Label>
                       <span className='font-normal text-[#525866]'>(Optional)</span>
                       <span className='relative ml-1 inline-flex size-4 items-center justify-center opacity-70'>
-                        <img src={iconInfo} alt='' className='h-4 w-4' />
+                        <BsFillInfoCircleFill className='size-4 shrink-0 text-white' aria-hidden />
                       </span>
                     </div>
                     <Input
@@ -269,21 +268,21 @@ export default function OfficeSpaceCalculatorCard() {
                   <div className='flex w-full flex-col gap-2 sm:flex-row sm:gap-2'>
                     <OfficeLayoutOption
                       selected={layoutType === 'compact'}
-                      iconSrc={iconCompact}
+                      icon={BsGrid3X3GapFill}
                       title='Compact Office'
                       description='Efficient layout focused on maximum seating and functional spaces.'
                       onClick={() => dispatch(setField({ name: 'layoutType', value: 'compact' }))}
                     />
                     <OfficeLayoutOption
                       selected={layoutType === 'standard'}
-                      iconSrc={iconStandard}
+                      icon={RiLayoutGridFill}
                       title='Standard Office'
                       description='A balanced mix of workstations, cabins, and collaboration areas.'
                       onClick={() => dispatch(setField({ name: 'layoutType', value: 'standard' }))}
                     />
                     <OfficeLayoutOption
                       selected={layoutType === 'lavish'}
-                      iconSrc={iconLavish}
+                      icon={RiLayoutColumnFill}
                       title='Lavish Office'
                       description='Premium layout with larger cabins & generous collaboration spaces.'
                       onClick={() => dispatch(setField({ name: 'layoutType', value: 'lavish' }))}

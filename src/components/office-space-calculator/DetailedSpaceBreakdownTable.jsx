@@ -12,9 +12,9 @@ import {
 import { ChevronDown, ChevronUp, Coffee, DownloadCloud, Plus } from 'lucide-react';
 import * as React from 'react';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { LuMonitorSpeaker } from 'react-icons/lu';
 
 import chairIcon from '@/assets/svg/chair-01.svg';
-import monitorIcon from '@/assets/svg/monitor-05.svg';
 
 function formatSqft(n) {
   return `${Math.round(n).toLocaleString()} sq ft.`;
@@ -35,7 +35,7 @@ function getGroupStyles(variant) {
       rowBg: 'bg-[#ebfdf5]',
       // Figma: size 20px, border 0.417px white
       iconWrap: 'bg-[#10a684] border border-white',
-      icon: <img src={monitorIcon} alt='' aria-hidden='true' className='h-[11px] w-[11px]' />,
+      icon: <LuMonitorSpeaker className='h-[11px] w-[11px] text-white' aria-hidden='true' />,
     };
   }
   if (variant === 'utility') {
