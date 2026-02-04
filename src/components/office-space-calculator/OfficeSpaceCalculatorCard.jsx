@@ -86,7 +86,6 @@ export default function OfficeSpaceCalculatorCard() {
   const showSummary = useSelector(selectOfficeCalculatorShowSummary);
   const layoutType = values?.layoutType ?? 'compact';
 
-  // Live results derived from current form values (used when summary is visible)
   const results = useMemo(() => {
     if (!showSummary) return null;
     return calcResults(normalizeForCalc(values));
@@ -325,9 +324,7 @@ export default function OfficeSpaceCalculatorCard() {
         </div>
       </div>
 
-      {/* Desktop interactive layout: right panel slides left, summary appears on right */}
       <div className='relative hidden h-full w-full lg:block'>
-        {/* Left marketing */}
         <div
           className={cn(
             'absolute left-0 top-0 h-full w-[608px] transition-opacity duration-300',
@@ -337,7 +334,6 @@ export default function OfficeSpaceCalculatorCard() {
           <LeftMarketingPanel />
         </div>
 
-        {/* Form panel (starts on right, slides to left on submit) */}
         <div
           className={cn(
             'absolute left-0 top-0 h-full w-[608px] transition-transform duration-500 ease-in-out',
@@ -349,7 +345,6 @@ export default function OfficeSpaceCalculatorCard() {
           </RightPanelShell>
         </div>
 
-        {/* Summary panel (appears on right after submit) */}
         <div
           className={cn(
             'absolute right-0 top-0 h-full w-[608px] transition-opacity duration-300',
@@ -363,13 +358,11 @@ export default function OfficeSpaceCalculatorCard() {
         </div>
       </div>
 
-      {/* vertical bar element from Figma */}
       <div
         aria-hidden='true'
         className='absolute bottom-0 left-1/2 h-[142px] w-[18px] -translate-x-1/2 bg-[#0a2540] lg:left-[calc(50%-8px)]'
       />
 
-      {/* inset shadow like Figma */}
       <div className='pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0px_-2px_3px_#cfd1d3]' />
     </Card>
   );
