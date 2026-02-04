@@ -3,11 +3,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 import rightpanelBg from '@/assets/image/rightpannel.png';
 import { useNavigate } from 'react-router-dom';
-
-const iconRuler = 'https://www.figma.com/api/mcp/asset/f80e462c-7173-406c-b374-f39953f35104';
-const iconArrowUp = 'https://www.figma.com/api/mcp/asset/f3990118-45a7-4a40-83e6-d8db6d55d0ee';
-const iconArrowUpCta = 'https://www.figma.com/api/mcp/asset/285c3e73-a5de-478d-8057-a57efa548ae1';
-const iconInfoSmall = 'https://www.figma.com/api/mcp/asset/444517a6-9e6b-43a2-bbb7-64dea4f7e7f3';
+import iconRuler from '@/assets/image/ruler.png';
+import iconArrowUp from '@/assets/image/ArrowUp.png';
+import iconArrowUpCta from '@/assets/image/sideArrow.png';
+import iconInfoSmall from '@/assets/image/info.png';
 
 const compactNumberFormatter = new Intl.NumberFormat('en-US', {
   notation: 'compact',
@@ -293,7 +292,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                 Explore Your Detailed Space Report
               </div>
               <div className='flex size-6 items-center justify-center'>
-                <div className='rotate-90'>
+                <div>
                   <img src={iconArrowUpCta} alt='' className='block size-6 max-w-none' />
                 </div>
               </div>
