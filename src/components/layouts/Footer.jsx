@@ -92,11 +92,9 @@ export default function Footer() {
 
   return (
     <>
-      {/* Footer 1 (converted from Webflow CSS to Tailwind) */}
       <footer className='bg-black min-h-[516px] border-t border-white/60 max-[479px]:min-h-0'>
-        <div className='box-content mx-auto w-full max-w-[1410px] pt-[50px] pb-[48px] px-[30px] max-[767px]:px-[15px] max-[479px]:px-[15px] max-[479px]:pt-[40px] max-[479px]:pb-[30px]'>
+        <div className='mx-auto w-full max-w-[1280px] px-4 pt-[50px] pb-[48px] sm:px-5 lg:px-[32px] max-[479px]:pt-[40px] max-[479px]:pb-[30px]'>
           <div className='flex flex-col items-start justify-between gap-10 lg:flex-row lg:gap-[60px] xl:gap-10 max-md:items-center'>
-            {/* Brand */}
             <div className='w-full lg:w-[31%] max-lg:w-1/2 max-md:w-[70%] max-sm:w-full max-md:text-center'>
               <a href='/' className='inline-block mb-8 max-md:mb-5'>
                 <img
@@ -109,7 +107,7 @@ export default function Footer() {
                 />
               </a>
 
-              <p className='mb-0 w-full max-w-[420px] text-[36px] font-medium leading-[46px] text-[#d8d8d8] max-[991px]:text-[30px] max-[991px]:leading-[40px] max-md:text-[24px] max-md:leading-[34px] max-md:max-w-none'>
+              <p className='mb-0 w-full max-w-[420px]  font-medium  text-[#d8d8d8] max-[991px]:text-[30px]  max-md:text-[24px] max-md:leading-[34px] max-md:max-w-none'>
                 Crafting inspiring office interiors that help people do their best work.
               </p>
 
@@ -167,7 +165,6 @@ export default function Footer() {
               </a>
             </div>
 
-            {/* Menus */}
             <div className='w-full'>
               <div className='grid grid-cols-1 gap-8 min-[768px]:grid-cols-3 min-[992px]:grid-cols-4 max-md:max-w-[345px] max-md:mx-auto'>
                 <div className='flex flex-col items-start text-left max-md:items-center max-md:text-center max-w-[240px]'>
@@ -176,7 +173,7 @@ export default function Footer() {
                     <a
                       key={l.href}
                       href={l.href}
-                      className='mt-3 text-[18px] font-normal leading-[30px] text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
+                      className='mt-3 text-[14px] font-medium leading-6 text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
                     >
                       {l.label}
                     </a>
@@ -191,7 +188,7 @@ export default function Footer() {
                     <a
                       key={l.href}
                       href={l.href}
-                      className='mt-3 text-[18px] font-normal leading-[30px] text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
+                      className='mt-3 text-[14px] font-medium leading-6 text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
                     >
                       {l.label}
                     </a>
@@ -199,13 +196,12 @@ export default function Footer() {
                 </div>
 
                 <div className='flex flex-col items-start text-left max-md:items-center max-md:text-center max-w-[240px]'>
-                  {/* Webflow hides this heading via font-size: 0 */}
                   <div className='mb-3 text-[0px] leading-5 text-white'>City pages</div>
                   {cityPages.map((l) => (
                     <a
                       key={l.href}
                       href={l.href}
-                      className='mt-3 text-[18px] font-normal leading-[30px] text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
+                      className='mt-3 text-[14px] font-medium leading-6 text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
                     >
                       {l.label}
                     </a>
@@ -221,7 +217,7 @@ export default function Footer() {
                       <a
                         key={l.href}
                         href={l.href}
-                        className='mt-3 text-[18px] font-normal leading-[30px] text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7] max-sm:mt-0'
+                        className='mt-3 text-[14px] font-medium leading-6 text-[#d8d8d8] no-underline transition-colors hover:text-[#3c4fb7]'
                       >
                         {l.label}
                       </a>
@@ -230,7 +226,6 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* More locations toggle (sits under Company column like Webflow) */}
               <div className='mt-10'>
                 <details className='w-full'>
                   <summary className='inline-flex cursor-pointer list-none items-center gap-2 text-[16px] font-semibold leading-6 text-white'>
@@ -276,9 +271,8 @@ export default function Footer() {
         </div>
       </footer>
 
-      {/* Footer strip (DevX / watermark / socials) */}
       <div className='bg-black pb-10 pt-14'>
-        <div className='mx-auto max-w-[1440px] px-4 sm:px-5 md:px-8 lg:px-[70px]'>
+        <div className='mx-auto w-full max-w-[1280px] px-4 sm:px-5 lg:px-[32px]'>
           {/* Partner row (centered like Webflow) */}
           <div className='flex justify-center'>
             <div className='flex w-full max-w-[1200px] flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-9'>
@@ -348,7 +342,6 @@ export default function Footer() {
             Investments to Grow and Prosper.
           </p>
 
-          {/* Watermark */}
           <div
             className='select-none text-center font-bold leading-none tracking-[-2px] text-transparent opacity-10'
             style={{
@@ -363,7 +356,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Bottom row */}
           <div className='mt-10 flex flex-col items-start justify-between gap-6 border-t border-white/80 pt-10 md:flex-row md:items-center'>
             <p className='text-base leading-6 text-[#d8d8d8]'>
               © 2026 Phi Designs. All rights reserved.
