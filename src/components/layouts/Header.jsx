@@ -1,18 +1,11 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CloudDownload, Phone, Share2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import mainBg from '@/assets/Main.jpg';
 
-/**
- * Header Component
- * - Responsive navbar (desktop links + mobile dropdown)
- * - Styled to match Phi/DevX Webflow header conventions
- */
 export default function Header() {
   const menuId = useId();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { pathname } = useLocation();
   const isDetailsSpaceAnalysisPage = pathname === '/details-space-analysis';
@@ -20,22 +13,7 @@ export default function Header() {
   async function handleShareReport() {
     const url = window.location.href;
 
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: document.title, url });
-        return;
-      }
-
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-        toast.success('Link copied');
-        return;
-      }
-
-      window.prompt('Copy this link:', url);
-    } catch {
-      toast.error('Could not share report');
-    }
+    console.log('url', url);
   }
 
   function handleDownloadPdf() {
@@ -43,23 +21,6 @@ export default function Header() {
     // user can choose "Save as PDF" in the browser print dialog.
     window.print();
   }
-
-  // Close on Escape
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === 'Escape') setIsMenuOpen(false);
-    }
-
-    if (isMenuOpen) window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isMenuOpen]);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    // Avoid setting state synchronously inside effect (eslint: react-hooks/set-state-in-effect)
-    const t = window.setTimeout(() => setIsMenuOpen(false), 0);
-    return () => window.clearTimeout(t);
-  }, [pathname]);
 
   // Add background on scroll (fixed header)
   useEffect(() => {
@@ -186,55 +147,8 @@ export default function Header() {
                   </a>
                 </>
               )}
-
-              {/* Mobile menu button */}
-              {isDetailsSpaceAnalysisPage ? null : (
-                <button
-                  type='button'
-                  className={`inline-flex items-center justify-center rounded-md px-[10px] py-2 text-[36px] leading-none lg:hidden ${
-                    isMenuOpen ? 'bg-[#1e6bd8] text-white' : 'bg-transparent text-white'
-                  }`}
-                  aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-                  aria-controls={menuId}
-                  aria-haspopup='menu'
-                  aria-expanded={isMenuOpen}
-                  onClick={() => setIsMenuOpen((v) => !v)}
-                >
-                  <img
-                    src='https://cdn.prod.website-files.com/664326cc68f40127d59c2683/685a98368529729d83382a10_List.svg'
-                    loading='lazy'
-                    alt=''
-                    className='h-7 w-7'
-                  />
-                </button>
-              )}
             </div>
           </div>
-
-          {/* Mobile menu */}
-          {isDetailsSpaceAnalysisPage ? null : (
-            <div id={menuId} role='menu' className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
-              <div className='mt-4 rounded-xl bg-white py-10'>
-                <ul className='flex flex-col items-center gap-3'>
-                  {[
-                    ...navItems,
-                    { label: 'Contact us', href: '/contact-us' },
-                    { label: 'Call +9199998001667', href: 'tel:+9199998001667' },
-                  ].map((item) => (
-                    <li key={item.href}>
-                      <a
-                        href={item.href}
-                        className='px-[10px] py-[10px] text-[15px] font-medium leading-6 text-[#101828] no-underline transition-colors hover:text-[#3c4fb7]'
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
         </div>
       </header>
     </>
