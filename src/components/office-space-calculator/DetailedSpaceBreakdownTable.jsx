@@ -48,21 +48,21 @@ function toSpecDocName(spaceTypeLabel) {
 function getGroupStyles(variant) {
   if (variant === 'production') {
     return {
-      rowBg: 'bg-[#ebfdf5]',
-      iconWrap: 'bg-[#10a684] border border-white',
+      rowBg: 'bg-osc-teal-bg',
+      iconWrap: 'bg-osc-teal border border-white',
       icon: <LuMonitorSpeaker className='h-[11px] w-[11px] text-white' aria-hidden='true' />,
     };
   }
   if (variant === 'utility') {
     return {
-      rowBg: 'bg-[#faf6fe]',
-      iconWrap: 'bg-[#7f56d9] border border-white',
+      rowBg: 'bg-osc-purple-bg',
+      iconWrap: 'bg-osc-purple border border-white',
       icon: <Coffee className='h-[11px] w-[11px] text-white' aria-hidden='true' />,
     };
   }
   return {
-    rowBg: 'bg-[#fffbeb]',
-    iconWrap: 'bg-[#ec620b] border border-white',
+    rowBg: 'bg-osc-orange-bg',
+    iconWrap: 'bg-osc-orange border border-white',
     icon: <img src={chairIcon} alt='' aria-hidden='true' className='h-[11px] w-[11px]' />,
   };
 }
@@ -511,7 +511,7 @@ export default function DetailedSpaceBreakdownTable({
                 >
                   {styles.icon}
                 </span>
-                <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                   {item.roomType}
                 </span>
               </div>
@@ -526,8 +526,8 @@ export default function DetailedSpaceBreakdownTable({
                   type='button'
                   className={cn(
                     "flex h-auto min-w-[140px] w-auto cursor-pointer items-center justify-start gap-2 rounded-none border-0 bg-transparent p-0 font-['Inter',sans-serif] shadow-none",
-                    'text-[14px] font-medium leading-[20px] text-[#475467]',
-                    'hover:text-[#344054] focus:outline-none focus:ring-0',
+                    'text-[14px] font-medium leading-[20px] text-osc-text-secondary',
+                    'hover:text-osc-text-hover focus:outline-none focus:ring-0',
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -535,7 +535,7 @@ export default function DetailedSpaceBreakdownTable({
                   }}
                   aria-label='Add new room row'
                 >
-                  <Plus className='h-4 w-4 shrink-0 text-[#475467]' aria-hidden='true' />
+                  <Plus className='h-4 w-4 shrink-0 text-osc-text-secondary' aria-hidden='true' />
                   <span>Add new Room</span>
                 </button>
               </div>
@@ -545,7 +545,7 @@ export default function DetailedSpaceBreakdownTable({
           if (item.type === 'grand_total') {
             return (
               <div className='flex h-full items-center'>
-                <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                   Grand Total
                 </span>
               </div>
@@ -562,7 +562,7 @@ export default function DetailedSpaceBreakdownTable({
             if (table.options.meta?.readOnly) {
               return (
                 <div className='flex h-full items-center'>
-                  <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                  <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                     {displayLabel}
                   </span>
                 </div>
@@ -597,7 +597,7 @@ export default function DetailedSpaceBreakdownTable({
                     aria-label={`Room type for ${item.roomType}`}
                     className={cn(
                       isNewlyAddedRoom &&
-                        '[&>span[data-placeholder]]:italic [&>span[data-placeholder]]:text-[#475467]',
+                        '[&>span[data-placeholder]]:italic [&>span[data-placeholder]]:text-osc-text-secondary',
                     )}
                   >
                     <span data-placeholder={!value ? '' : undefined}>{triggerLabel}</span>
@@ -616,7 +616,7 @@ export default function DetailedSpaceBreakdownTable({
 
           return (
             <div className='flex h-full items-center'>
-              <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+              <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                 {item.roomType}
               </span>
             </div>
@@ -644,7 +644,7 @@ export default function DetailedSpaceBreakdownTable({
           if (table.options.meta?.readOnly) {
             return (
               <div className='flex h-full items-center'>
-                <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                   {options.includes(value) ? value : (options[0] ?? value)}
                 </span>
               </div>
@@ -698,7 +698,7 @@ export default function DetailedSpaceBreakdownTable({
           if (table.options.meta?.readOnly) {
             return (
               <div className='flex h-full items-center'>
-                <span className="text-[14px] font-medium leading-[20px] text-[#101828] font-['Inter',sans-serif]">
+                <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                   {value}
                 </span>
               </div>
@@ -708,7 +708,7 @@ export default function DetailedSpaceBreakdownTable({
           return (
             <div className='flex h-full items-center'>
               <input
-                className="h-[30px] w-[117px] rounded-[6px] border border-[#d0d5dd] bg-white px-[6px] py-[2px] text-[14px] font-medium leading-[18px] text-[#101828] shadow-[0px_1px_2px_rgba(16,24,40,0.05)] outline-none font-['Inter',sans-serif]"
+                className="h-[30px] w-[117px] rounded-[6px] border border-osc-border-light bg-white px-[6px] py-[2px] text-[14px] font-medium leading-[18px] text-osc-text-primary shadow-[0px_1px_2px_var(--color-osc-shadow)] outline-none font-['Inter',sans-serif]"
                 value={value}
                 onChange={(e) => {
                   const nextVal = e.target.value.replaceAll(/\D/g, '');
@@ -744,7 +744,7 @@ export default function DetailedSpaceBreakdownTable({
           if (item.type !== 'row') return null;
           return (
             <div className='flex h-full items-center'>
-              <span className="text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif] whitespace-nowrap">
+              <span className="text-[14px] font-medium leading-[20px] text-osc-text-secondary font-['Inter',sans-serif] whitespace-nowrap">
                 {formatSqft(item.areaPerUnit)}
               </span>
             </div>
@@ -764,8 +764,8 @@ export default function DetailedSpaceBreakdownTable({
                   className={cn(
                     "text-[14px] leading-[20px] font-['Inter',sans-serif] whitespace-nowrap",
                     item.type === 'grand_total'
-                      ? 'font-semibold text-[#101828]'
-                      : 'font-medium text-[#475467]',
+                      ? 'font-semibold text-osc-text-primary'
+                      : 'font-medium text-osc-text-secondary',
                   )}
                 >
                   {formatSqft(item.totalArea ?? 0)}
@@ -793,7 +793,7 @@ export default function DetailedSpaceBreakdownTable({
               <div className='flex h-full items-center justify-end'>
                 <button
                   type='button'
-                  className='inline-flex h-8 w-8 items-center justify-center rounded-md text-[#475467] hover:bg-red-50 hover:text-red-600'
+                  className='inline-flex h-8 w-8 items-center justify-center rounded-md text-osc-text-secondary hover:bg-red-50 hover:text-red-600'
                   onClick={(e) => {
                     e.stopPropagation();
                     if (isCustomRow) {
@@ -825,7 +825,7 @@ export default function DetailedSpaceBreakdownTable({
                 }}
                 aria-label={isExpanded ? 'Collapse group' : 'Expand group'}
               >
-                <Icon className='h-4 w-4 text-[#475467]' aria-hidden='true' />
+                <Icon className='h-4 w-4 text-osc-text-secondary' aria-hidden='true' />
               </button>
             </div>
           );
@@ -868,25 +868,28 @@ export default function DetailedSpaceBreakdownTable({
   });
 
   return (
-    <Card className='overflow-hidden rounded-[12px] border border-[#eaecf0] bg-white shadow-[0px_1px_2px_rgba(16,24,40,0.05)]'>
-      {/* Header */}
+    <Card className='overflow-hidden rounded-[12px] border border-osc-border bg-white shadow-[0px_1px_2px_var(--color-osc-shadow)]'>
       <div className='flex items-center gap-4 px-6 py-5'>
         <div className='flex flex-1 items-center gap-2'>
-          <div className="text-[18px] font-semibold leading-[28px] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]">
+          <div className="text-[18px] font-semibold leading-[28px] text-osc-text-primary font-['Plus_Jakarta_Sans',sans-serif]">
             Detailed Space Breakdown
           </div>
-          <div className='rounded-full border border-[#e9d7fe] bg-[#f9f5ff] px-2 py-[2px]'>
-            <span className="text-[12px] font-medium leading-[18px] text-[#6941c6] font-['Plus_Jakarta_Sans',sans-serif]">
+          <div className='rounded-full border border-osc-purple-border bg-osc-purple-badge px-2 py-[2px]'>
+            <span className="text-[12px] font-medium leading-[18px] text-osc-purple-text font-['Plus_Jakarta_Sans',sans-serif]">
               {efficiencyOpportunitiesCount} efficiency opportunities
             </span>
           </div>
         </div>
-        <Button type='button' variant='outline' className='h-10 rounded-[8px] border-[#d0d5dd]'>
+        <Button
+          type='button'
+          variant='outline'
+          className='h-10 rounded-[8px] border-osc-border-light'
+        >
           <DownloadCloud className='h-4 w-4' aria-hidden='true' />
           Download
         </Button>
       </div>
-      <div className='h-px w-full bg-[#eaecf0]' />
+      <div className='h-px w-full bg-osc-border' />
 
       {/* Table */}
       <Table.Root variant='unstyled' className='overflow-x-hidden [&_table]:table-fixed'>
@@ -907,7 +910,7 @@ export default function DetailedSpaceBreakdownTable({
                   <Table.Head
                     key={header.id}
                     className={cn(
-                      "h-[44px] bg-white border-b border-[#eaecf0] py-3 text-[12px] font-medium leading-[18px] text-[#475467] font-['Inter',sans-serif]",
+                      "h-[44px] bg-white border-b border-osc-border py-3 text-[12px] font-medium leading-[18px] text-osc-text-secondary font-['Inter',sans-serif]",
                       meta.align === 'right' ? 'text-right' : 'text-left',
                       meta.pad ?? 'px-6',
                     )}
@@ -930,12 +933,12 @@ export default function DetailedSpaceBreakdownTable({
 
             const rowClassName =
               item.type === 'group'
-                ? cn('border-b border-[#eaecf0]', getGroupStyles(item.variant).rowBg)
+                ? cn('border-b border-osc-border', getGroupStyles(item.variant).rowBg)
                 : item.type === 'add_room'
-                  ? 'border-b border-[#eaecf0] bg-[#fcfdfe]'
+                  ? 'border-b border-osc-border bg-osc-bg-card'
                   : item.type === 'grand_total'
-                    ? 'bg-[#f7f7f7]'
-                    : 'border-b border-[#eaecf0] bg-white';
+                    ? 'bg-osc-bg-total'
+                    : 'border-b border-osc-border bg-white';
 
             const rowHeightClass =
               item.type === 'group'
@@ -979,7 +982,7 @@ export default function DetailedSpaceBreakdownTable({
                         alignClass,
                         pad,
                         rowPad,
-                        isNewlyAddedRoomCell && '!border !border-[#3c4fb7]',
+                        isNewlyAddedRoomCell && '!border !border-osc-primary',
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

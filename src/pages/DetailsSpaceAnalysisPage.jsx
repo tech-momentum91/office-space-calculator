@@ -1,10 +1,8 @@
 import Footer from '@/components/layouts/Footer';
 import Header from '@/components/layouts/Header';
 import illustration from '@/assets/image/illustation.png';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { ArrowDown, ArrowUp, CheckCircle2, Coffee, Lightbulb, Ruler } from 'lucide-react';
+import { Coffee } from 'lucide-react';
 import { RiBuildingLine } from 'react-icons/ri';
 import { LuMonitorSpeaker } from 'react-icons/lu';
 
@@ -17,6 +15,11 @@ import { calcResults, normalizeForCalc } from '@/utils/office-space-calculator/c
 import { formatCompact } from '@/utils/office-space-calculator/formatNumbers';
 import UnlockResultsModal from '@/components/office-space-calculator/UnlockResultsModal';
 import SpaceAnalysisPdfDocument from '@/components/office-space-calculator/SpaceAnalysisPdfDocument';
+import StatCard from '@/components/office-space-calculator/StatCard';
+import SpaceUtilizationCard from '@/components/office-space-calculator/SpaceUtilizationCard';
+import PageSectionTitle from '@/components/office-space-calculator/PageSectionTitle';
+import EfficiencyOpportunitiesCard from '@/components/office-space-calculator/EfficiencyOpportunitiesCard';
+import BoqBanner from '@/components/office-space-calculator/BoqBanner';
 import { pdf } from '@react-pdf/renderer';
 import {
   useGetOfficeSpaceCalculatorQuery,
@@ -37,123 +40,6 @@ function formatLayoutLabel(layoutType) {
   if (layoutType === 'compact') return 'Compact';
   if (layoutType === 'standard') return 'Standard';
   return 'Lavish';
-}
-
-function StatCard({ title, value, unit, icon, iconWrapperClassName, gradient, meta, className }) {
-  return (
-    <Card
-      className={cn(
-        'flex h-[160px] flex-1 flex-col gap-4 rounded-[12px] border border-[#f8fcff] bg-transparent p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]',
-        className,
-      )}
-      style={gradient ? { backgroundImage: gradient } : undefined}
-    >
-      <div className='flex w-full items-center gap-3'>
-        <div
-          className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-full',
-            iconWrapperClassName,
-          )}
-        >
-          {icon}
-        </div>
-        <div className="flex-1 text-[16px] font-semibold leading-[24px] text-[#667085] font-['Plus Jakarta Sans',sans-serif]">
-          {title}
-        </div>
-      </div>
-      <div className='flex items-baseline gap-2'>
-        <span className="inline-block whitespace-nowrap text-[32px] font-semibold leading-[1.2] tracking-[-1.6px] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]">
-          {value}
-        </span>
-        <span className="inline-block whitespace-nowrap text-[20px] font-semibold leading-[1.2] tracking-[-1px] text-[#475467] font-['Plus_Jakarta_Sans',sans-serif]">
-          {unit}
-        </span>
-      </div>
-      {meta ? <div className='flex w-full items-center gap-1'>{meta}</div> : null}
-    </Card>
-  );
-}
-
-function SpaceUtilizationCard({ totalSpaceNeeded, availableCarpetArea }) {
-  const needed = Number(totalSpaceNeeded) || 0;
-  const available = Number(availableCarpetArea) || 0;
-
-  const delta = needed - available;
-  const isOverCapacity = delta > 0;
-  const pct = available > 0 ? Math.round((needed / available) * 100) : 0;
-
-  // Bar: when over capacity → blue = available, red = overflow. When under → blue = needed, red = excess (both visible).
-  const barBase = Math.max(needed, available, 1);
-  const bluePct = isOverCapacity
-    ? Math.min(available / barBase, 1) * 100
-    : (needed / barBase) * 100;
-  const redPct = isOverCapacity
-    ? Math.max((needed - available) / barBase, 0) * 100
-    : Math.max((available - needed) / barBase, 0) * 100;
-
-  return (
-    <Card
-      className='flex flex-col justify-between rounded-[12px] border border-[#f8fcff] p-6 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] lg:col-span-2 sm:col-span-2 col-span-full'
-      style={{
-        backgroundImage:
-          'linear-gradient(107deg, rgba(255, 214, 214, 0.00) -36.03%, rgba(255, 214, 214, 0.30) 100.13%)',
-      }}
-    >
-      <div className='flex items-start gap-2'>
-        <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#ffd6d6]'>
-          <Ruler className='h-4 w-4 text-[#475467]' aria-hidden='true' />
-        </div>
-        <div className="text-[18px] font-semibold leading-[1.2] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]">
-          Space Utilization
-        </div>
-      </div>
-
-      <div className='mt-4 flex w-full flex-col gap-4'>
-        <div className='flex w-full items-center justify-end gap-2'>
-          <div className='flex items-center gap-[2px]'>
-            {isOverCapacity ? (
-              <ArrowUp className='h-5 w-5 text-[#d92d20]' aria-hidden='true' />
-            ) : (
-              <ArrowDown className='h-5 w-5 text-[#12b76a]' aria-hidden='true' />
-            )}
-            <span className="text-[14px] font-medium leading-[20px] text-[#d92d20] font-['Inter',sans-serif]">
-              {pct}%
-            </span>
-          </div>
-          <span className="text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif]">
-            {isOverCapacity ? 'sqft over Capacity' : 'sqft under Capacity'}
-          </span>
-        </div>
-
-        <div className='flex w-full flex-col gap-2'>
-          <div className='h-[12px] w-full overflow-hidden rounded-full bg-[#eef2f6]'>
-            <div className='flex h-full w-full'>
-              <div className='h-full bg-[#2970ff]' style={{ width: `${bluePct}%` }} />
-              {redPct > 0 ? (
-                <div className='h-full bg-[#f04438]' style={{ width: `${redPct}%` }} />
-              ) : null}
-            </div>
-          </div>
-
-          <div className="flex w-full items-center justify-between text-[14px] font-medium leading-[20px] text-[#475467] font-['Inter',sans-serif]">
-            {isOverCapacity ? (
-              <>
-                <span>0 sq ft</span>
-                <span>{Number(available).toLocaleString()} sqft</span>
-                <span>{Number(needed).toLocaleString()} sqft</span>
-              </>
-            ) : (
-              <>
-                <span>0 sq ft</span>
-                <span>{Number(needed).toLocaleString()} sqft</span>
-                <span>{Number(available).toLocaleString()} sqft</span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
 }
 
 export default function DetailsSpaceAnalysisPage() {
@@ -847,7 +733,7 @@ export default function DetailsSpaceAnalysisPage() {
   if (sessionPending) {
     return (
       <div className='relative flex min-h-screen items-center justify-center bg-white'>
-        <div className='text-[16px] font-medium text-[#667085]'>Checking session…</div>
+        <div className='text-[16px] font-medium text-osc-text-muted'>Checking session…</div>
       </div>
     );
   }
@@ -865,25 +751,17 @@ export default function DetailsSpaceAnalysisPage() {
         {/* Page content */}
         <div className='mx-auto w-full max-w-[1280px] px-6 pb-16 pt-10'>
           <div className='flex flex-col gap-6'>
-            <div className='flex flex-col gap-[2px] items-start'>
-              <div className='flex flex-col items-start'>
-                <div className="text-[36px] font-semibold leading-[1.2] tracking-[-1.8px] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]">
-                  Your Detailed Space Analysis
-                </div>
-              </div>
-              <div className='flex flex-col items-start justify-center py-1 h-[38px]'>
-                <div className="text-[20px] font-medium leading-[1.2] tracking-[-0.8px] text-[#667085] font-['Plus_Jakarta_Sans',sans-serif]">
-                  Optimise your office space with intelligent recommendations
-                </div>
-              </div>
-            </div>
+            <PageSectionTitle
+              title='Your Detailed Space Analysis'
+              subtitle='Optimise your office space with intelligent recommendations'
+            />
 
             {/* Top stats */}
             <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
               {reportId && isReportLoading ? (
-                <div className='col-span-full text-[14px] text-[#667085]'>Loading report…</div>
+                <div className='col-span-full text-[14px] text-osc-text-muted'>Loading report…</div>
               ) : reportId && isReportError ? (
-                <div className='col-span-full text-[14px] text-[#667085]'>
+                <div className='col-span-full text-[14px] text-osc-text-muted'>
                   Could not load this report.
                 </div>
               ) : null}
@@ -891,23 +769,23 @@ export default function DetailsSpaceAnalysisPage() {
                 title='Total Space Needed'
                 value={(totalSpaceNeeded ?? 0).toLocaleString()}
                 unit='sqft.'
-                gradient='linear-gradient(109deg, rgba(227, 235, 253, 0.00) -28.7%, #E3EBFD 216.83%)'
-                iconWrapperClassName='bg-[#3c4fb7]'
+                gradient='var(--color-osc-gradient-stat-blue)'
+                iconWrapperClassName='bg-osc-primary'
                 icon={<RiBuildingLine className='h-4 w-4 text-white' aria-hidden='true' />}
               />
               <StatCard
                 title='Seating Capacity'
                 value={(seatingCapacity ?? 0).toLocaleString()}
                 unit='sqft.'
-                gradient='linear-gradient(107deg, rgba(254, 239, 223, 0.00) -36.03%, #FEEFDF 100.13%)'
-                iconWrapperClassName='bg-[#ec670b] border-[0.667px] border-white'
+                gradient='var(--color-osc-gradient-stat-orange)'
+                iconWrapperClassName='bg-osc-orange border-[0.667px] border-white'
                 icon={<img src={chairIcon} alt='' aria-hidden='true' className='h-4 w-4' />}
                 meta={
                   <>
-                    <span className="text-[12px] font-medium leading-[20px] text-[#d92d20] font-['Plus_Jakarta_Sans',sans-serif]">
+                    <span className='text-[12px] font-medium leading-[20px] text-osc-error font-[family-name:var(--font-family-sans)]'>
                       {formatCompact(spacePerPerson)} sq ft.
                     </span>
-                    <span className="text-[12px] font-medium leading-[20px] text-[#475467] font-['Plus_Jakarta_Sans',sans-serif]">
+                    <span className='text-[12px] font-medium leading-[20px] text-osc-text-secondary font-[family-name:var(--font-family-sans)]'>
                       space per person
                     </span>
                   </>
@@ -919,16 +797,16 @@ export default function DetailsSpaceAnalysisPage() {
                     title='Production Area'
                     value={productivity.toLocaleString()}
                     unit='sqft.'
-                    gradient='linear-gradient(107deg, rgba(228, 247, 243, 0.00) -40.8%, #E4F7F3 100%)'
-                    iconWrapperClassName='bg-[#10a684] border-[0.667px] border-white'
+                    gradient='var(--color-osc-gradient-stat-teal)'
+                    iconWrapperClassName='bg-osc-teal border-[0.667px] border-white'
                     icon={<LuMonitorSpeaker className='h-4 w-4 text-white' aria-hidden='true' />}
                   />
                   <StatCard
                     title='Utility and Breakout'
                     value={utility.toLocaleString()}
                     unit='sqft.'
-                    gradient='linear-gradient(107deg, rgba(247, 241, 255, 0.00) -51.92%, #F7F1FF 100%)'
-                    iconWrapperClassName='bg-[#7f56d9]'
+                    gradient='var(--color-osc-gradient-stat-purple)'
+                    iconWrapperClassName='bg-osc-purple'
                     icon={<Coffee className='h-4 w-4 text-white' aria-hidden='true' />}
                   />
                 </>
@@ -957,98 +835,11 @@ export default function DetailsSpaceAnalysisPage() {
                 readOnly={isSharedView}
               />
 
-              <Card className='overflow-hidden rounded-[10.66px] border-[0.888px] border-[#eaecf0] bg-[#fafbfc] shadow-[0px_0.888px_1.777px_rgba(16,24,40,0.05)]'>
-                {/* Header */}
-                <div className='flex items-center gap-[10.66px] border-b-[0.888px] border-[#eaecf0] bg-[#fafbfc] px-[21.32px] py-[14.213px]'>
-                  <div className='flex h-[42.64px] w-[42.64px] items-center justify-center rounded-full border border-[#f6d67a] bg-[#fff4d6]'>
-                    <Lightbulb className='h-5 w-5 text-[#f97316]' aria-hidden='true' />
-                  </div>
-                  <div className="flex-1 text-[15.99px] font-semibold leading-[21.32px] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]">
-                    Efficiency Opportunities
-                  </div>
-                </div>
-
-                {/* Cards */}
-                <div className='flex flex-col gap-[21.32px] px-[21.32px] py-[9.772px]'>
-                  {efficiencyOpportunities.map((item) => (
-                    <div
-                      key={item.title}
-                      className='rounded-b-[10.66px] border-t-[4.442px]'
-                      style={{ borderTopColor: item.topBorderColor }}
-                    >
-                      <Card className='overflow-hidden rounded-b-[10.66px] border border-[#eaecf0] bg-white shadow-[0px_0.888px_1.777px_rgba(16,24,40,0.05)]'>
-                        <div className='flex flex-col gap-[14.213px] p-[21.32px]'>
-                          <div className='flex items-start gap-[23.985px]'>
-                            <div className='flex-1'>
-                              <div className="text-[14px] font-semibold leading-[21.32px] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]">
-                                {item.title}
-                              </div>
-                            </div>
-                            <div className='flex items-center gap-[3.553px] rounded-[6px] border border-[#e2e4e9] bg-white px-[7.107px] py-[3.553px] pl-[3.553px]'>
-                              <CheckCircle2
-                                className='h-[21.32px] w-[21.32px] text-[#12b76a]'
-                                aria-hidden='true'
-                              />
-                              <span className="text-[10.66px] font-medium leading-[14.213px] text-[#525866] font-['Plus_Jakarta_Sans',sans-serif]">
-                                {item.save}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="text-[14px] font-normal leading-[17.766px] text-[#475467] font-['Plus_Jakarta_Sans',sans-serif]">
-                            {item.body}
-                          </div>
-                        </div>
-
-                        <div className='border-t border-[#eaecf0]' />
-                        <div className='flex items-center justify-center py-[14.213px]'>
-                          <button
-                            type='button'
-                            className="text-[14px] font-semibold leading-[17.766px] text-[#2563eb] font-['Plus_Jakarta_Sans',sans-serif]"
-                          >
-                            Apply Suggestion
-                          </button>
-                        </div>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Apply all */}
-                <button
-                  type='button'
-                  className="w-full border-t-[0.888px] border-[#d0d5dd] bg-white py-4 text-center text-[15.99px] font-semibold leading-[43.528px] text-[#101828] font-['Plus_Jakarta_Sans',sans-serif]"
-                >
-                  Apply All
-                </button>
-              </Card>
+              <EfficiencyOpportunitiesCard opportunities={efficiencyOpportunities} />
             </div>
           </div>
         </div>
-        {/* BOQ banner */}
-        <div className='bg-[#071a2f]'>
-          <div className='mx-auto flex w-full max-w-[1280px] items-center justify-between gap-4 px-6 py-6'>
-            <div>
-              <div className="text-[18px] font-semibold text-white font-['Plus_Jakarta_Sans',sans-serif]">
-                Want to explore BOQ?
-              </div>
-              <div className="text-[12px] font-medium text-white/70 font-['Plus_Jakarta_Sans',sans-serif]">
-                Check out our AI BOQ Estimator and make your plan full proof!
-              </div>
-            </div>
-            <div className='flex items-center gap-3'>
-              <Button
-                type='button'
-                variant='outline'
-                className='h-10 rounded-[8px] border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white'
-              >
-                Dismiss
-              </Button>
-              <Button type='button' variant='gradient' className='h-10 rounded-[8px] px-4'>
-                Checkout BOQ Estimator
-              </Button>
-            </div>
-          </div>
-        </div>
+        <BoqBanner />
 
         {/* Illustration + footer */}
         <section className='py-0 bg-white border-t border-neutral-200'>
