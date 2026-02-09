@@ -26,7 +26,7 @@ export default function WelcomePage() {
 
           {/* CTA Section */}
           <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-8'>
-            <Button size='lg' onClick={() => navigate('/login')} className='px-8 py-6 text-lg'>
+            <Button size='lg' onClick={() => navigate('/calculator')} className='px-8 py-6 text-lg'>
               Get Started →
             </Button>
             <Button
