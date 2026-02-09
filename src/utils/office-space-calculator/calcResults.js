@@ -1,7 +1,3 @@
-function roundToNearest10(number_) {
-  return Math.round(number_ / 10) * 10;
-}
-
 export function normalizeForCalc(values) {
   const workstationsRequired =
     values?.workstationsRequired === '' || values?.workstationsRequired === undefined
@@ -27,18 +23,12 @@ function toAreaKeyFromRoomType(roomType) {
     .trim()
     .toLowerCase()
     .replaceAll(/[^\da-z]/g, '');
-
   if (!s) return null;
   if (s === 'workstation' || s === 'workstations') return 'workstation';
   if (s === 'meetingroom' || s === 'meetingrooms') return 'meetingRoom';
   if (s === 'leadershipcabin' || s === 'leadershipcabins') return 'leadershipCabin';
-  if (
-    s === 'directorcabin' ||
-    s === 'directorcabins' ||
-    s === 'managercabin' ||
-    s === 'managercabins'
-  )
-    return 'directorCabin';
+  if (s === 'directorcabin' || s === 'directorcabins') return 'directorCabin';
+  if (s === 'managercabin' || s === 'managercabins') return 'managerCabin';
   if (s === 'reception' || s === 'receptions') return 'reception';
   if (s === 'serverroom' || s === 'serverrooms') return 'serverRoom';
   if (s === 'cafeteria' || s === 'cafeterias') return 'cafeteria';
@@ -61,6 +51,11 @@ function deriveUnitAreasFromSpecType(specTypeDoc, fallbackUnitAreas) {
     if (Number.isFinite(v) && v > 0) next[key] = v;
   }
 
+  // Database "director cabin" = frontend "leadership cabin": use same area when present
+  if (Number.isFinite(next.directorCabin) && next.directorCabin > 0) {
+    next.leadershipCabin = next.directorCabin;
+  }
+
   return next;
 }
 
@@ -80,7 +75,7 @@ export function calcResults(data, options = {}) {
       // Per-layout unit area values
       meetingRoom: 30,
       leadershipCabin: 50,
-      directorCabin: 40,
+      managerCabin: 40,
       reception: 36,
       serverRoom: 38,
       cafeteria: 36,
@@ -89,7 +84,7 @@ export function calcResults(data, options = {}) {
       workstation: 77,
       meetingRoom: 36,
       leadershipCabin: 50,
-      directorCabin: 40,
+      managerCabin: 40,
       reception: 36,
       serverRoom: 38,
       cafeteria: 36,
@@ -98,7 +93,7 @@ export function calcResults(data, options = {}) {
       workstation: 90,
       meetingRoom: 40,
       leadershipCabin: 50,
-      directorCabin: 40,
+      managerCabin: 40,
       reception: 36,
       serverRoom: 38,
       cafeteria: 36,
@@ -108,14 +103,13 @@ export function calcResults(data, options = {}) {
   const fallbackUnitAreas = unitAreasByLayout[layoutType] ?? unitAreasByLayout.compact;
   const unitAreas =
     deriveUnitAreasFromSpecType(options?.specType, fallbackUnitAreas) ?? fallbackUnitAreas;
-
   // Productivity area formula (as requested):
   // (layout type * workstations) + (layout type * meeting rooms) + (layout type * leadership cabins) + (layout type * director cabins)
   const productivitySqft = Math.round(
     workstations * unitAreas.workstation +
       meetingRooms * unitAreas.meetingRoom +
       leadershipCabins * unitAreas.leadershipCabin +
-      managerCabins * unitAreas.directorCabin,
+      managerCabins * (unitAreas.managerCabin ?? unitAreas.directorCabin ?? 40),
   );
 
   // Utility formula (as requested):
@@ -148,9 +142,8 @@ export function calcResults(data, options = {}) {
   // Requirement: Circulation area (15%) = 15% of (Productivity area + Utility area)
   const circulationSqft = Math.round(((productivitySqft + utilitySqft) * 15) / 100);
 
-  const estimatedSpaceNeeded = roundToNearest10(productivitySqft + utilitySqft + circulationSqft);
-  const delta =
-    existing === undefined ? undefined : roundToNearest10(estimatedSpaceNeeded - existing);
+  const estimatedSpaceNeeded = Math.round(productivitySqft + utilitySqft + circulationSqft);
+  const delta = existing === undefined ? undefined : Math.round(estimatedSpaceNeeded - existing);
 
   const seatingSqft = Math.round(workstations * 57.5);
   // spacePerPerson = estimatedSpaceNeeded / seatingSqft (fallback to unit area when no seating)
@@ -178,8 +171,8 @@ export function calcResults(data, options = {}) {
     {
       label: 'Manager Cabin',
       count: managerCabins,
-      unitArea: unitAreas.directorCabin,
-      sqft: Math.round(managerCabins * unitAreas.directorCabin),
+      unitArea: unitAreas.managerCabin ?? unitAreas.directorCabin ?? 40,
+      sqft: Math.round(managerCabins * (unitAreas.managerCabin ?? unitAreas.directorCabin ?? 40)),
     },
     {
       label: 'Director Cabin',
