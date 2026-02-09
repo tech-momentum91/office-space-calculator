@@ -28,6 +28,7 @@ import {
   zodIssuesToFieldErrors,
 } from '@/schemas/office-space-calculator/calculatorSchema';
 import { calcResults, normalizeForCalc } from '@/utils/office-space-calculator/calcResults';
+import { useGetSpecTypeQuery } from '@/store/api/officeSpaceCalculatorApi';
 
 function formatLayoutLabel(layoutType) {
   if (layoutType === 'compact') return 'Compact Office';
@@ -49,7 +50,6 @@ function LeftMarketingPanel() {
         </div>
       </div>
 
-      {/* Figma: 58px left/right padding => content width 492px */}
       <div className='relative w-full px-[58px] py-0'>
         <div className="flex w-[492px] flex-col gap-4 font-['Plus_Jakarta_Sans',sans-serif]">
           <div className='text-[44px] font-semibold leading-[56.2px] tracking-[-2.56px]'>
@@ -84,11 +84,12 @@ export default function OfficeSpaceCalculatorCard() {
   const errors = useSelector(selectOfficeCalculatorErrors);
   const showSummary = useSelector(selectOfficeCalculatorShowSummary);
   const layoutType = values?.layoutType ?? 'compact';
+  const { data: specTypeDoc } = useGetSpecTypeQuery(layoutType, { skip: !showSummary });
 
   const results = useMemo(() => {
     if (!showSummary) return null;
-    return calcResults(normalizeForCalc(values));
-  }, [showSummary, values]);
+    return calcResults(normalizeForCalc(values), { specType: specTypeDoc });
+  }, [showSummary, values, specTypeDoc]);
 
   const summaryRows = useMemo(() => {
     if (!showSummary || !results) return [];

@@ -4,8 +4,8 @@ import Footer from '@/components/layouts/Footer';
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 
-import mainBg from '@/assets/Main.jpg';
-import illustration from '@/assets/illustation.png';
+import mainBg from '@/assets/image/Main.jpg';
+import illustration from '@/assets/image/illustation.png';
 import OfficeSpaceCalculatorCard from '@/components/office-space-calculator/OfficeSpaceCalculatorCard';
 export default function OfficeSpaceCalculatorPage() {
   return (

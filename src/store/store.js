@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { baseApi } from './api/baseApi';
+import './api/countriesApi'; // inject countries endpoints into baseApi
 import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
 import officeCalculatorReducer from './slices/officeCalculatorSlice';
@@ -22,7 +23,13 @@ export const store = configureStore({
     ...getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types for serializable check
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        ignoredActions: [
+          'persist/PERSIST',
+          'persist/REHYDRATE',
+          // RTK Query rejected actions contain Error objects that are non-serializable
+          'api/executeMutation/rejected',
+          'api/executeQuery/rejected',
+        ],
       },
     }),
     baseApi.middleware,

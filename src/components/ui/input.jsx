@@ -9,7 +9,6 @@ const inputVariants = cva(
     variants: {
       variant: {
         default: 'h-10',
-        // Figma: node-id=1209:39312 "Basic Input"
         basic:
           "h-[36px] rounded-[10px] border-[#e2e4e9] bg-white pl-[12px] pr-[10px] py-[10px] text-[14px] leading-[20px] tracking-[-0.084px] font-normal text-[#0a0d14] placeholder:text-[#868c98] focus-visible:ring-0 focus-visible:ring-offset-0 font-['Plus_Jakarta_Sans',sans-serif]",
       },

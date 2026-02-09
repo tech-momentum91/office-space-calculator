@@ -7,24 +7,15 @@ import { RiRuler2Line } from 'react-icons/ri';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import { FaArrowRight } from 'react-icons/fa';
 import { FiArrowUp } from 'react-icons/fi';
-
-const compactNumberFormatter = new Intl.NumberFormat('en-US', {
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
-
-function formatCompact(n) {
-  const num = Number(n);
-  if (!Number.isFinite(num)) return '—';
-  // Intl outputs like "15K" → match UI style "15k"
-  return compactNumberFormatter.format(num).replace('K', 'k').replace('M', 'm').replace('B', 'b');
-}
+import { useSelector, useDispatch } from 'react-redux';
+import { selectOfficeCalculatorValues } from '@/store/slices/officeCalculatorSlice';
+import { useCreateOfficeSpaceCalculatorReportMutation } from '@/store/api/officeSpaceCalculatorApi';
+import { checkSession } from '@/store/slices/authSlice';
+import { formatCompact } from '@/utils/office-space-calculator/formatNumbers';
 
 function formatDeltaSqft(delta) {
   const abs = Math.abs(Number(delta) || 0);
-  // Keep full numbers for small values (matches Figma “2000”)
   if (abs < 10000) return abs.toLocaleString();
-  // Compact for very large values to avoid UI overflow
   return formatCompact(abs);
 }
 
@@ -38,6 +29,64 @@ function formatTopSqft(value) {
 
 export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const values = useSelector(selectOfficeCalculatorValues);
+  const { isAuthenticated, sessionChecked } = useSelector((state) => state.auth);
+  const [createReport, { isLoading: isCreatingReport }] =
+    useCreateOfficeSpaceCalculatorReportMutation();
+
+  async function handleExploreDetailedReport() {
+    const layoutType = (values?.layoutType ?? 'compact').toString().toLowerCase();
+    const availableCarpetArea = results?.existing ?? values?.existingCarpetArea ?? 0;
+    const workstationsNeeded = values?.workstationsRequired;
+
+    const unitAreas = results?.unitAreas ?? {};
+    const spacePerPerson = results?.spacePerPerson ?? unitAreas.workstation ?? 0;
+
+    const payload = {
+      available_carpet_area: availableCarpetArea,
+      workstations_needed: workstationsNeeded,
+      office_layout_type: layoutType,
+      space_per_person: spacePerPerson,
+      calc_results: results,
+
+      workstations: results?.workstations ?? 0,
+      meeting_rooms: results?.meetingRooms ?? 0,
+      leadership_cabins: results?.leadershipCabins ?? 0,
+      director_cabins: results?.managerCabins ?? 0,
+      zonal: results?.zonal ?? [],
+      collaboration: results?.collaboration ?? [],
+      utility_breakout: results?.utilityBreakdown ?? [],
+    };
+
+    try {
+      let isLoggedIn = isAuthenticated;
+      if (!sessionChecked) {
+        try {
+          await dispatch(checkSession()).unwrap();
+          isLoggedIn = true;
+        } catch {
+          isLoggedIn = false;
+        }
+      }
+
+      if (isLoggedIn) {
+        const res = await createReport(payload).unwrap();
+        const reportName = res?.name || res?.data?.name || res?.message?.name;
+        if (!reportName) throw new Error('Report creation failed');
+        navigate(`/details-space-analysis/${reportName}`);
+      } else {
+        try {
+          sessionStorage.setItem('office-space-calculator-pending-report', JSON.stringify(payload));
+        } catch (error) {
+          console.warn('Could not store pending report in sessionStorage', error);
+        }
+        navigate('/details-space-analysis');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <TooltipProvider>
@@ -53,7 +102,6 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           </div>
         </div>
 
-        {/* Top results (Figma node-id=1209:42115) */}
         <div className='absolute left-[124px] top-[48px] flex w-[360px] flex-col items-center gap-4'>
           <div className='flex w-[248px] flex-col items-center gap-6 text-center'>
             <div
@@ -124,7 +172,6 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           </Tooltip>
         </div>
 
-        {/* Key Insights (Figma node-id=1209:42129) */}
         <div className='absolute left-[63px] top-[275px] w-[497px]'>
           <div className='relative h-[309px] w-full overflow-hidden rounded-[16px] bg-[#fcfcfc]'>
             <div className='absolute left-6 top-6 flex w-[447px] flex-col gap-3'>
@@ -159,7 +206,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                     </div>
                     <div className="py-[5px] text-[12px] font-medium leading-[1.3] text-[#656a6b] font-['Plus_Jakarta_Sans',sans-serif]">
                       <span className='font-bold'>
-                        {results ? `${results.spacePerPerson}sqft ` : '—'}
+                        {results ? `${formatCompact(results.spacePerPerson)}sqft ` : '—'}
                       </span>
                       <span>Space per Person</span>
                     </div>
@@ -171,16 +218,15 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                 {/* Zonal distribution */}
                 <div className='flex flex-col'>
                   <div className='rounded-tl-[8px] rounded-tr-[8px] bg-[#3f9cb4] px-[10px] py-1'>
-                    <div className="text-[12px] font-medium leading-[1.3] text-white font-['Plus_Jakarta_Sans',sans-serif]">
+                    <span className="inline-block w-[140px] text-center text-[12px] font-medium leading-[1.3] text-white font-['Plus_Jakarta_Sans',sans-serif]">
                       Zonal Distribution
-                    </div>
+                    </span>
                   </div>
                   <div className='h-[120px] w-[215.5px] rounded-bl-[10px] rounded-br-[10px] rounded-tr-[10px] bg-[#eaecf5] px-3'>
                     {results?.zonal?.map((row, idx) => (
                       <div
                         key={row.label}
                         className={cn(
-                          // Figma row (1209:42147): no clipping when content fits
                           'flex items-center justify-between gap-2 py-[12px] text-[12px]',
                           idx !== results.zonal.length - 1 ? 'border-b border-[#d5d9eb]' : '',
                         )}
@@ -219,9 +265,9 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                 {/* Collaboration area */}
                 <div className='flex flex-col'>
                   <div className='rounded-tl-[8px] rounded-tr-[8px] bg-[#366b9b] px-[10px] py-1'>
-                    <div className="text-[12px] font-medium leading-[1.3] text-white font-['Plus_Jakarta_Sans',sans-serif]">
+                    <span className="inline-block w-[140px] text-center text-[12px] font-medium leading-[1.3] text-white font-['Plus_Jakarta_Sans',sans-serif]">
                       Collaboration Area
-                    </div>
+                    </span>
                   </div>
                   <div className='h-[120px] w-[215.5px] rounded-bl-[10px] rounded-br-[10px] rounded-tr-[10px] bg-[#eaecf5] px-3'>
                     {results?.collaboration?.map((row, idx) => (
@@ -271,7 +317,6 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           </div>
         </div>
 
-        {/* CTA (Figma node-id=1209:42170) */}
         <div className='absolute left-1/2 top-[616px] w-[462px] -translate-x-1/2 text-center'>
           <div className="text-[18px] font-semibold leading-[30px] tracking-[-0.4608px] text-[#130636] font-['Plus_Jakarta_Sans',sans-serif]">
             Want a room-by-room breakdown and deeper insights?
@@ -280,7 +325,8 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           <button
             type='button'
             className='mx-auto mt-4 rounded-[8px] p-3 shadow-[0px_1px_2px_rgba(0,0,0,0.05)]'
-            onClick={() => navigate('/details-space-analysis')}
+            onClick={handleExploreDetailedReport}
+            disabled={isCreatingReport}
             style={{
               backgroundImage:
                 'linear-gradient(161.957deg, #0D47A1 8.4861%, #0058A6 25.092%, #0066A4 41.697%, #00729E 58.303%, #007E97 74.908%, #00888F 91.514%)',
@@ -297,7 +343,6 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           </button>
         </div>
 
-        {/* inset shadow like Figma */}
         <div className='pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0px_-3px_3px_rgba(228,229,231,0.48)]' />
       </div>
     </TooltipProvider>

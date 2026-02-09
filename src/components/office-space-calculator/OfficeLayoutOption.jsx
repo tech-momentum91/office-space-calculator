@@ -31,7 +31,6 @@ export default function OfficeLayoutOption({
       )}
     >
       <div className='flex w-full flex-col gap-[10px]'>
-        {/* Figma node-id=1209:42097: 24px box with 16.25% inset */}
         <div className='relative size-6 overflow-hidden'>
           <div className='absolute inset-[16.25%] flex items-center justify-center'>
             {Icon ? (

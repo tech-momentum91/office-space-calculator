@@ -22,7 +22,49 @@ export function normalizeForCalc(values) {
   };
 }
 
-export function calcResults(data) {
+function toAreaKeyFromRoomType(roomType) {
+  const s = String(roomType ?? '')
+    .trim()
+    .toLowerCase()
+    .replaceAll(/[^\da-z]/g, '');
+
+  if (!s) return null;
+  if (s === 'workstation' || s === 'workstations') return 'workstation';
+  if (s === 'meetingroom' || s === 'meetingrooms') return 'meetingRoom';
+  if (s === 'leadershipcabin' || s === 'leadershipcabins') return 'leadershipCabin';
+  if (
+    s === 'directorcabin' ||
+    s === 'directorcabins' ||
+    s === 'managercabin' ||
+    s === 'managercabins'
+  )
+    return 'directorCabin';
+  if (s === 'reception' || s === 'receptions') return 'reception';
+  if (s === 'serverroom' || s === 'serverrooms') return 'serverRoom';
+  if (s === 'cafeteria' || s === 'cafeterias') return 'cafeteria';
+
+  return null;
+}
+
+function deriveUnitAreasFromSpecType(specTypeDoc, fallbackUnitAreas) {
+  const rows = specTypeDoc?.room_type_areas;
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+
+  // Start from fallback so missing fields don't break formulas.
+  const next = { ...fallbackUnitAreas };
+
+  for (const r of rows) {
+    const key = toAreaKeyFromRoomType(r?.room_type);
+    if (!key) continue;
+
+    const v = Number(r?.area_per_unit ?? 0);
+    if (Number.isFinite(v) && v > 0) next[key] = v;
+  }
+
+  return next;
+}
+
+export function calcResults(data, options = {}) {
   const workstations = Number(data?.workstationsRequired ?? 0) || 0;
   const meetingRooms = Number(data?.meetingRooms ?? 0) || 0;
   const leadershipCabins = Number(data?.leadershipCabins ?? 0) || 0;
@@ -63,8 +105,9 @@ export function calcResults(data) {
     },
   };
 
-  const unitAreas = unitAreasByLayout[layoutType] ?? unitAreasByLayout.compact;
-  const spacePerPerson = unitAreas.workstation;
+  const fallbackUnitAreas = unitAreasByLayout[layoutType] ?? unitAreasByLayout.compact;
+  const unitAreas =
+    deriveUnitAreasFromSpecType(options?.specType, fallbackUnitAreas) ?? fallbackUnitAreas;
 
   // Productivity area formula (as requested):
   // (layout type * workstations) + (layout type * meeting rooms) + (layout type * leadership cabins) + (layout type * director cabins)
@@ -109,7 +152,10 @@ export function calcResults(data) {
   const delta =
     existing === undefined ? undefined : roundToNearest10(estimatedSpaceNeeded - existing);
 
-  const seatingSqft = Math.round(workstations * 40.77); // matches Figma sample: 30 -> 1223
+  const seatingSqft = Math.round(workstations * 57.5);
+  // spacePerPerson = estimatedSpaceNeeded / seatingSqft (fallback to unit area when no seating)
+  const spacePerPerson =
+    seatingSqft > 0 ? estimatedSpaceNeeded / seatingSqft : unitAreas.workstation;
 
   const totalForPct = estimatedSpaceNeeded || 1;
   const productivityPct = Math.round((productivitySqft / totalForPct) * 100);
@@ -130,13 +176,13 @@ export function calcResults(data) {
       sqft: Math.round(meetingRooms * unitAreas.meetingRoom),
     },
     {
-      label: 'Manager Cabins',
+      label: 'Manager Cabin',
       count: managerCabins,
       unitArea: unitAreas.directorCabin,
       sqft: Math.round(managerCabins * unitAreas.directorCabin),
     },
     {
-      label: 'Leadership Cabins',
+      label: 'Director Cabin',
       count: leadershipCabins,
       unitArea: unitAreas.leadershipCabin,
       sqft: Math.round(leadershipCabins * unitAreas.leadershipCabin),

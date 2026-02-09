@@ -1,94 +1,118 @@
 export default function Footer() {
+  const webflowBaseRaw = import.meta.env.PHI_WEBFLOW_URL ?? '';
+  const webflowBase = webflowBaseRaw
+    ? (webflowBaseRaw.startsWith('http') ? webflowBaseRaw : `https://${webflowBaseRaw}`).replace(
+      /\/$/,
+      '',
+    )
+    : '';
   const companyLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'About', href: '/about-us' },
-    { label: 'Portfolio', href: '/portfolio' },
-    { label: 'Walkthrough', href: '/virtual-walkthroughs' },
-    { label: 'Interior Financing', href: '/office-interior-financing' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Contact Us', href: '/contact-us' },
-    { label: 'Vendor partners', href: '/vendor-partners' },
-    { label: 'Careers', href: '/careers' },
-  ];
+    { label: 'Home', path: '/' },
+    { label: 'About', path: 'about-us' },
+    { label: 'Portfolio', path: 'portfolio' },
+    { label: 'Walkthrough', path: 'virtual-walkthroughs' },
+    { label: 'Interior Financing', path: 'office-interior-financing' },
+    { label: 'Blog', path: 'blog' },
+    { label: 'Contact Us', path: 'contact-us' },
+    { label: 'Vendor partners', path: 'vendor-partners' },
+    { label: 'Careers', path: 'careers' },
+  ].map((item) => ({
+    ...item,
+    href: webflowBase ? `${webflowBase}/${item.path}` : `/${item.path}`,
+  }));
 
   const serviceAreas = [
-    { label: 'Office Interiors - Mumbai', href: '/office-interior-designer-in-mumbai' },
-    { label: 'Office Interiors - Pune', href: '/office-interior-designer-in-pune' },
-    { label: 'Office Interiors - Bengaluru', href: '/office-interior-designer-in-bangalore' },
-    { label: 'Office Interiors - Noida', href: '/office-interior-designer-in-noida' },
-    { label: 'Office Interiors - Hyderabad', href: '/office-interior-designer-in-hyderabad' },
-    { label: 'Office Interiors - Rajkot', href: '/office-interior-designer-in-rajkot' },
-  ];
+    { label: 'Office Interiors - Mumbai', path: 'office-interior-designer-in-mumbai' },
+    { label: 'Office Interiors - Pune', path: 'office-interior-designer-in-pune' },
+    { label: 'Office Interiors - Bengaluru', path: 'office-interior-designer-in-bangalore' },
+    { label: 'Office Interiors - Noida', path: 'office-interior-designer-in-noida' },
+    { label: 'Office Interiors - Hyderabad', path: 'office-interior-designer-in-hyderabad' },
+    { label: 'Office Interiors - Rajkot', path: 'office-interior-designer-in-rajkot' },
+  ].map((item) => ({
+    ...item,
+    href: webflowBase ? `${webflowBase}/${item.path}` : `/${item.path}`,
+  }));
 
   const cityPages = [
-    { label: 'Office Interiors - Delhi', href: '/office-interior-designer-in-delhi' },
-    { label: 'Office Interiors - Gurgaon', href: '/office-interior-designer-in-gurgaon' },
-    { label: 'Office Interiors - Kolkata', href: '/office-interior-designers-in-kolkata' },
-    { label: 'Office Interiors - Ahmedabad', href: '/office-interior-designer-in-ahmedabad' },
-    { label: 'Office Interiors - Udaipur', href: '/office-interior-designers-in-udaipur' },
-    { label: 'Office Interiors - Vadodara', href: '/office-interior-designer-in-vadodara' },
-  ];
+    { label: 'Office Interiors - Delhi', path: 'office-interior-designer-in-delhi' },
+    { label: 'Office Interiors - Gurgaon', path: 'office-interior-designer-in-gurgaon' },
+    { label: 'Office Interiors - Ahmedabad', path: 'office-interior-designer-in-ahmedabad' },
+    { label: 'Office Interiors - Vadodara', path: 'office-interior-designer-in-vadodara' },
+    { label: 'Office Interiors - Jaipur', path: 'office-interior-designer-in-jaipur' },
+    { label: 'Office Interiors - Indore', path: 'office-interior-designer-in-indore' },
+  ].map((item) => ({
+    ...item,
+    href: webflowBase ? `${webflowBase}/${item.path}` : `/${item.path}`,
+  }));
 
   const cityPagesMore = [
-    { label: 'Office Interiors - Jaipur', href: '/office-interior-designer-in-jaipur' },
-    { label: 'Office Interiors - Chandigarh', href: '/office-interior-designers-in-chandigarh' },
-    { label: 'Office Interiors - Kochi', href: '/office-interior-designers-in-kochi' },
-    { label: 'Office Interiors - Chennai', href: '/office-interior-designer-in-chennai' },
-    { label: 'Office Interiors - Thane', href: '/office-interior-designers-in-thane' },
-  ];
+    { label: 'Office Interiors - Chennai', path: 'office-interior-designer-in-chennai' },
+    { label: 'Office Interiors - Kolkata', path: 'office-interior-designers-in-kolkata' },
+    { label: 'Office Interiors - Chandigarh', path: 'office-interior-designers-in-chandigarh' },
+    { label: 'Office Interiors - Kochi', path: 'office-interior-designers-in-kochi' },
+    { label: 'Office Interiors - Thane', path: 'office-interior-designers-in-thane' },
+  ].map((item) => ({
+    ...item,
+    href: webflowBase ? `${webflowBase}/${item.path}` : `/${item.path}`,
+  }));
 
   const moreLocationsCols = [
     [
-      { label: 'Office Interiors - Amritsar', href: '/office-interior-designers-in-amritsar' },
-      { label: 'Office Interiors - Ghaziabad', href: '/office-interior-designers-in-ghaziabad' },
-      { label: 'Office Interiors - Faridabad', href: '/office-interior-designers-in-faridabad' },
-      { label: 'Office Interiors - Agra', href: '/office-interior-designers-in-agra' },
-      { label: 'Office Interiors - Patiala', href: '/office-interior-designers-in-patiala' },
-      { label: 'Office Interiors - Dwarka', href: '/office-interior-designers-in-dwarka' },
-      { label: 'Office Interiors - Indore', href: '/office-interior-designer-in-indore' },
+      { label: 'Office Interiors - Amritsar', path: 'office-interior-designers-in-amritsar' },
+      { label: 'Office Interiors - Ghaziabad', path: 'office-interior-designers-in-ghaziabad' },
+      { label: 'Office Interiors - Faridabad', path: 'office-interior-designers-in-faridabad' },
+      { label: 'Office Interiors - Agra', path: 'office-interior-designers-in-agra' },
+      { label: 'Office Interiors - Patiala', path: 'office-interior-designers-in-patiala' },
+      { label: 'Office Interiors - Dwarka', path: 'office-interior-designers-in-dwarka' },
+      { label: 'Office Interiors - Indore', path: 'office-interior-designer-in-indore' },
       {
         label: 'Office Interiors - Gift city Gandhi nagar',
-        href: '/office-interior-designers-in-gift-city-gandhinagar',
+        path: 'office-interior-designers-in-gift-city-gandhinagar',
       },
     ],
     [
-      { label: 'Office Interiors - Surat', href: '/office-interior-designers-in-surat' },
-      { label: 'Office Interiors - Raipur', href: '/office-interior-designers-in-raipur' },
-      { label: 'Office Interiors - Patna', href: '/office-interior-designers-in-patna' },
-      { label: 'Office Interiors - Nashik', href: '/office-interior-designers-in-nashik' },
-      { label: 'Office Interiors - Nagpur', href: '/office-interior-designers-in-nagpur' },
-      { label: 'Office Interiors - Lucknow', href: '/office-interior-designers-in-lucknow' },
-      { label: 'Office Interiors - Madurai', href: '/office-interior-designers-in-madurai' },
+      { label: 'Office Interiors - Surat', path: 'office-interior-designers-in-surat' },
+      { label: 'Office Interiors - Raipur', path: 'office-interior-designers-in-raipur' },
+      { label: 'Office Interiors - Patna', path: 'office-interior-designers-in-patna' },
+      { label: 'Office Interiors - Nashik', path: 'office-interior-designers-in-nashik' },
+      { label: 'Office Interiors - Nagpur', path: 'office-interior-designers-in-nagpur' },
+      { label: 'Office Interiors - Lucknow', path: 'office-interior-designers-in-lucknow' },
+      { label: 'Office Interiors - Madurai', path: 'office-interior-designers-in-madurai' },
       {
         label: 'Office Interiors - Bhubaneswar',
-        href: '/office-interior-designers-in-bhubaneswar',
+        path: 'office-interior-designers-in-bhubaneshwar',
       },
     ],
     [
-      { label: 'Office Interiors - Srinagar', href: '/office-interior-designers-in-sri-nagar' },
-      { label: 'Office Interiors - Hubballi', href: '/office-interior-designers-in-hubli' },
-      { label: 'Office Interiors - Guwahati', href: '/office-interior-designers-in-guwahati' },
-      { label: 'Office Interiors - Siliguri', href: '/office-interior-designers-in-siliguri' },
-      { label: 'Office Interiors - Goa', href: '/office-interior-designers-in-goa' },
-      { label: 'Office Interiors - Dehradun', href: '/office-interior-designers-in-dehradun' },
+      { label: 'Office Interiors - Srinagar', path: 'office-interior-designers-in-sri-nagar' },
+      { label: 'Office Interiors - Hubballi', path: 'office-interior-designers-in-hubli' },
+      { label: 'Office Interiors - Guwahati', path: 'office-interior-designers-in-guwahati' },
+      { label: 'Office Interiors - Siliguri', path: 'office-interior-designers-in-siliguri' },
+      { label: 'Office Interiors - Goa', path: 'office-interior-designers-in-goa' },
+      { label: 'Office Interiors - Dehradun', path: 'office-interior-designers-in-dehradun' },
       {
         label: 'Office Interiors - Navi Mumbai',
-        href: '/office-interior-designers-in-navi-mumbai',
+        path: 'office-interior-designers-in-navi-mumbai',
       },
     ],
     [
-      { label: 'Office Interiors - Bhopal', href: '/office-interior-designers-in-bhopal' },
-      { label: 'Office Interiors - Ludhiana', href: '/office-interior-designers-in-ludhiana' },
-      { label: 'Office Interiors - Agra', href: '/office-interior-designers-in-agra' },
-      { label: 'Office Interiors - Mohali', href: '/office-interior-designers-in-mohali' },
-      { label: 'Office Interiors - Jalandhar', href: '/office-interior-designers-in-jalandhar' },
-      { label: 'Office Interiors - Coimbatore', href: '/office-interior-designers-in-coimbatore' },
+      { label: 'Office Interiors - Bhopal', path: 'office-interior-designers-in-bhopal' },
+      { label: 'Office Interiors - Ludhiana', path: 'office-interior-designers-in-ludhiana' },
+      { label: 'Office Interiors - Agra', path: 'office-interior-designers-in-agra' },
+      { label: 'Office Interiors - Mohali', path: 'office-interior-designers-in-mohali' },
+      { label: 'Office Interiors - Jalandhar', path: 'office-interior-designers-in-jalandhar' },
+      { label: 'Office Interiors - Coimbatore', path: 'office-interior-designers-in-coimbatore' },
       {
         label: 'Office Interiors - Visakhapatnam',
-        href: '/office-interior-designers-in-visakhapatnam',
+        path: 'office-interior-designers-in-visakhapatnam',
       },
     ],
-  ];
+  ].map((col) =>
+    col.map((item) => ({
+      ...item,
+      href: webflowBase ? `${webflowBase}/${item.path}` : `/${item.path}`,
+    })),
+  );
 
   return (
     <>

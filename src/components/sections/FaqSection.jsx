@@ -8,7 +8,6 @@ export default function FaqSection({ faqItems }) {
     <section className='bg-[#0A2540]'>
       {/* Fixed frame size (Width 1445px, Height 1016px) */}
       <div className='relative mx-auto w-full max-w-[1445px] h-[1016px] overflow-hidden'>
-        {/* Skewed vertical lines overlay (Figma: 1209:38335) */}
         <div className='pointer-events-none absolute inset-0 opacity-60'>
           <div className='absolute left-1/2 top-1/2 h-[3024px] w-[1074px] -translate-x-1/2 -translate-y-1/2'>
             <div className='-rotate-6 -skew-x-6 scale-y-[0.99]'>
@@ -23,7 +22,7 @@ export default function FaqSection({ faqItems }) {
           </div>
         </div>
 
-        <div className='relative z-10 mx-auto h-full w-full max-w-[1209.331px] px-6 flex items-center'>
+        <div className='relative z-10 mx-auto h-full w-full max-w-[1280px] px-4 sm:px-5 lg:px-[32px] flex items-center'>
           <div className='w-full flex flex-col gap-10 lg:flex-row lg:gap-[5px]'>
             {/* Left heading */}
             <div className='lg:w-[618px]'>

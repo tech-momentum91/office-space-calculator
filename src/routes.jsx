@@ -28,11 +28,42 @@ const routes = [
     element: (
       <RouteErrorBoundary>
         <Suspense fallback={<PageLoader />}>
-          <OfficeSpaceCalculatorPage />
+          <WelcomePage />
         </Suspense>
       </RouteErrorBoundary>
     ),
   },
+  {
+    path: '/welcome',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <WelcomePage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+  {
+    path: '/login',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <LoginPage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+  {
+    path: '/dashboard',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <DashboardPage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+
   {
     path: '/calculator',
     element: (
@@ -44,7 +75,7 @@ const routes = [
     ),
   },
   {
-    path: '/details-space-analysis',
+    path: '/details-space-analysis/:reportId?',
     element: (
       <RouteErrorBoundary>
         <Suspense fallback={<PageLoader />}>
@@ -52,11 +83,6 @@ const routes = [
         </Suspense>
       </RouteErrorBoundary>
     ),
-  },
-  // Alias for common misspelling
-  {
-    path: '/details-space-analaysis',
-    element: <Navigate to='/details-space-analysis' replace />,
   },
   {
     path: '*',

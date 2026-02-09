@@ -8,7 +8,6 @@ const sliderRootVariants = cva('relative flex w-full touch-none select-none item
   variants: {
     variant: {
       default: '',
-      // Figma slider (BG node-id=1209:39328): bg #e5e7ec, radius 96
       calculator: '',
     },
   },
