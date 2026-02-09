@@ -42,7 +42,7 @@ export default function EfficiencyOpportunityItem({
         </div>
 
         <div className='border-t border-osc-border' />
-        <div className='flex items-center justify-center py-[14.213px]'>
+        {/* <div className='flex items-center justify-center py-[14.213px]'>
           <button
             type='button'
             className='text-[14px] font-semibold leading-[17.766px] text-osc-link font-[family-name:var(--font-family-sans)]'
@@ -50,7 +50,7 @@ export default function EfficiencyOpportunityItem({
           >
             {applyLabel}
           </button>
-        </div>
+        </div> */}
       </Card>
     </div>
   );

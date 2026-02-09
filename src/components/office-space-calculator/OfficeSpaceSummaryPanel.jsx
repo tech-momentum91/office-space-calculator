@@ -206,7 +206,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
                     </div>
                     <div className="py-[5px] text-[12px] font-medium leading-[1.3] text-[#656a6b] font-['Plus_Jakarta_Sans',sans-serif]">
                       <span className='font-bold'>
-                        {results ? `${formatCompact(results.spacePerPerson)}sqft ` : '—'}
+                        {results ? `${formatCompact(results.spacePerPerson)} sqft ` : '—'}
                       </span>
                       <span>Space per Person</span>
                     </div>

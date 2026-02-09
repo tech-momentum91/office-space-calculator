@@ -19,7 +19,7 @@ import { useLazyGetAreaPerUnitQuery } from '@/store/api/officeSpaceCalculatorApi
 import chairIcon from '@/assets/svg/chair-01.svg';
 
 function formatSqft(n) {
-  return `${Math.round(n).toLocaleString()} sq ft.`;
+  return `${Math.round(n).toLocaleString()} sqft.`;
 }
 
 function parseCount(raw, fallback = 0) {
@@ -231,6 +231,7 @@ export default function DetailedSpaceBreakdownTable({
   getSpecTypeOptionsForRoomType,
   onPersistRowChange,
   onDeleteRoomRow,
+  onBreakdownChange,
   persistedCustomRowKeys = [],
   readOnly = false,
 }) {
@@ -492,6 +493,54 @@ export default function DetailedSpaceBreakdownTable({
     return out;
   }, [data, expandedGroups]);
 
+  // Notify parent of effective totals when table data changes (so stat cards can stay in sync).
+  // Only emit when stats actually change to avoid loop: parent updates grandTotalSqft -> data changes -> effect runs again.
+  const lastEmittedStatsRef = React.useRef(null);
+  React.useEffect(() => {
+    if (typeof onBreakdownChange !== 'function') return;
+    const productivity =
+      data.find((r) => r.type === 'group' && r.groupKey === 'Productivity Area')?.totalArea ?? 0;
+    const utility =
+      data.find((r) => r.type === 'group' && r.groupKey === 'Utility and Breakout')?.totalArea ?? 0;
+    const circulation =
+      data.find((r) => r.type === 'group' && r.groupKey === 'Circulation Area')?.totalArea ?? 0;
+    const totalSpaceNeeded =
+      data.find((r) => r.type === 'grand_total')?.totalArea ?? productivity + utility + circulation;
+    const workstationsRow = data.find(
+      (r) =>
+        r.type === 'row' &&
+        r.groupKey === 'Productivity Area' &&
+        String(r.roomType ?? '')
+          .toLowerCase()
+          .includes('workstation'),
+    );
+    const seatingCapacity = workstationsRow?.countNum ?? 0;
+    const spacePerPerson =
+      seatingCapacity > 0 && totalSpaceNeeded > 0 ? totalSpaceNeeded / seatingCapacity : 0;
+    const next = {
+      totalSpaceNeeded: Math.round(totalSpaceNeeded),
+      productivity: Math.round(productivity),
+      utility: Math.round(utility),
+      circulation: Math.round(circulation),
+      seatingCapacity,
+      spacePerPerson,
+    };
+    const prev = lastEmittedStatsRef.current;
+    if (
+      prev &&
+      prev.totalSpaceNeeded === next.totalSpaceNeeded &&
+      prev.productivity === next.productivity &&
+      prev.utility === next.utility &&
+      prev.circulation === next.circulation &&
+      prev.seatingCapacity === next.seatingCapacity &&
+      prev.spacePerPerson === next.spacePerPerson
+    ) {
+      return;
+    }
+    lastEmittedStatsRef.current = next;
+    onBreakdownChange(next);
+  }, [data, onBreakdownChange]);
+
   const columns = React.useMemo(
     () => [
       {
@@ -622,7 +671,7 @@ export default function DetailedSpaceBreakdownTable({
             </div>
           );
         },
-        meta: { pad: 'px-6', rowPad: 'py-4' },
+        meta: { pad: 'px-4', rowPad: 'py-4' },
       },
       {
         id: 'spaceType',
@@ -643,7 +692,7 @@ export default function DetailedSpaceBreakdownTable({
 
           if (table.options.meta?.readOnly) {
             return (
-              <div className='flex h-full items-center'>
+              <div className='flex h-full items-center justify-center'>
                 <span className="text-[14px] font-medium leading-[20px] text-osc-text-primary font-['Inter',sans-serif]">
                   {options.includes(value) ? value : (options[0] ?? value)}
                 </span>
@@ -652,7 +701,7 @@ export default function DetailedSpaceBreakdownTable({
           }
 
           return (
-            <div className='flex h-full items-center'>
+            <div className='flex h-full items-center justify-center'>
               <Select
                 value={options.includes(value) ? value : (options[0] ?? value)}
                 onValueChange={(v) => {
@@ -684,7 +733,7 @@ export default function DetailedSpaceBreakdownTable({
             </div>
           );
         },
-        meta: { pad: 'px-6', rowPad: 'py-4' },
+        meta: { align: 'center', pad: 'px-4', rowPad: 'py-4' },
       },
       {
         id: 'count',
@@ -708,7 +757,7 @@ export default function DetailedSpaceBreakdownTable({
           return (
             <div className='flex h-full items-center'>
               <input
-                className="h-[30px] w-[117px] rounded-[6px] border border-osc-border-light bg-white px-[6px] py-[2px] text-[14px] font-medium leading-[18px] text-osc-text-primary shadow-[0px_1px_2px_var(--color-osc-shadow)] outline-none font-['Inter',sans-serif]"
+                className="h-[30px] w-[64px] rounded-[6px] border border-osc-border-light bg-white px-[6px] py-[2px] text-[14px] font-medium leading-[18px] text-osc-text-primary shadow-[0px_1px_2px_var(--color-osc-shadow)] outline-none font-['Inter',sans-serif]"
                 value={value}
                 onChange={(e) => {
                   const nextVal = e.target.value.replaceAll(/\D/g, '');
@@ -734,7 +783,7 @@ export default function DetailedSpaceBreakdownTable({
             </div>
           );
         },
-        meta: { pad: 'px-6', rowPad: 'py-4' },
+        meta: { pad: 'px-4', rowPad: 'py-4' },
       },
       {
         id: 'areaPerUnit',
@@ -750,7 +799,7 @@ export default function DetailedSpaceBreakdownTable({
             </div>
           );
         },
-        meta: { pad: 'px-6', rowPad: 'py-4' },
+        meta: { pad: 'px-4', rowPad: 'py-4' },
       },
       {
         id: 'totalArea',
@@ -775,7 +824,7 @@ export default function DetailedSpaceBreakdownTable({
           }
           return null;
         },
-        meta: { align: 'right', pad: 'px-6', rowPad: 'py-4' },
+        meta: { align: 'right', pad: 'px-4', rowPad: 'py-4' },
       },
       {
         id: 'expand',
@@ -894,11 +943,11 @@ export default function DetailedSpaceBreakdownTable({
       {/* Table */}
       <Table.Root variant='unstyled' className='overflow-x-hidden [&_table]:table-fixed'>
         <colgroup>
-          <col style={{ width: '28%' }} />
-          <col style={{ width: '22%' }} />
+          <col style={{ width: '26%' }} />
+          <col style={{ width: '20%' }} />
           <col style={{ width: '14%' }} />
-          <col style={{ width: '17%' }} />
-          <col style={{ width: '17%' }} />
+          <col style={{ width: '16%' }} />
+          <col style={{ width: '16%' }} />
           <col style={{ width: '44px' }} />
         </colgroup>
         <Table.Header>
@@ -911,8 +960,12 @@ export default function DetailedSpaceBreakdownTable({
                     key={header.id}
                     className={cn(
                       "h-[44px] bg-white border-b border-osc-border py-3 text-[12px] font-medium leading-[18px] text-osc-text-secondary font-['Inter',sans-serif]",
-                      meta.align === 'right' ? 'text-right' : 'text-left',
-                      meta.pad ?? 'px-6',
+                      meta.align === 'right'
+                        ? 'text-right'
+                        : meta.align === 'center'
+                          ? 'text-center'
+                          : 'text-left',
+                      meta.pad ?? 'px-4',
                     )}
                     style={meta.width ? { width: meta.width } : undefined}
                   >
@@ -958,8 +1011,13 @@ export default function DetailedSpaceBreakdownTable({
               >
                 {row.getVisibleCells().map((cell) => {
                   const meta = cell.column.columnDef.meta || {};
-                  const alignClass = meta.align === 'right' ? 'text-right' : 'text-left';
-                  const pad = cell.column.id === 'count' ? 'px-3' : (meta.pad ?? 'px-6');
+                  const alignClass =
+                    meta.align === 'right'
+                      ? 'text-right'
+                      : meta.align === 'center'
+                        ? 'text-center'
+                        : 'text-left';
+                  const pad = meta.pad ?? 'px-4';
                   const rowPad = 'py-0';
                   const isNewlyAddedRoomCell =
                     cell.column.id === 'roomType' &&

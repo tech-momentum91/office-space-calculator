@@ -92,6 +92,11 @@ export default function DetailsSpaceAnalysisPage() {
   const isReportError = isSharedView ? queryByShare?.isError : queryNormal?.isError;
   const refetchReport = isSharedView ? queryByShare?.refetch : queryNormal?.refetch;
 
+  // Scroll to top when opening or switching to this page
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [reportId, shareToken]);
+
   // Run session check on mount so we know whether to show page or unlock modal
   React.useEffect(() => {
     if (!sessionChecked) {
@@ -283,6 +288,30 @@ export default function DetailsSpaceAnalysisPage() {
   );
 
   const [persistedCustomRowKeys, setPersistedCustomRowKeys] = React.useState(() => []);
+  const [breakdownDerivedStats, setBreakdownDerivedStats] = React.useState(null);
+  const lastBreakdownStatsRef = React.useRef(null);
+  const handleBreakdownChange = React.useCallback((stats) => {
+    lastBreakdownStatsRef.current = stats;
+    setBreakdownDerivedStats(stats);
+  }, []);
+
+  React.useEffect(() => {
+    setBreakdownDerivedStats(null);
+    lastBreakdownStatsRef.current = null;
+  }, [reportId]);
+
+  const getTotalsPayload = React.useCallback(() => {
+    const stats = lastBreakdownStatsRef.current;
+    const doc = reportDocument;
+    return {
+      total_space_needed: stats?.totalSpaceNeeded ?? doc?.total_space_needed ?? 0,
+      production_area: stats?.productivity ?? doc?.production_area ?? 0,
+      utility_breakout: stats?.utility ?? doc?.utility_breakout ?? 0,
+      circulation: stats?.circulation ?? doc?.circulation ?? 0,
+      seating_capacity: stats?.seatingCapacity ?? doc?.seating_capacity ?? 0,
+      space_per_person: stats?.spacePerPerson ?? doc?.space_per_person ?? 0,
+    };
+  }, [reportDocument]);
 
   const persistRoomRowChange = React.useCallback(
     async ({ rowKey, roomTypeLabel, spaceTypeLabel, count }) => {
@@ -311,7 +340,7 @@ export default function DetailsSpaceAnalysisPage() {
         try {
           await updateOfficeSpaceCalculator({
             name: reportId,
-            data: { rooms: roomsPayload },
+            data: { rooms: roomsPayload, ...getTotalsPayload() },
           }).unwrap();
           await refetchReport?.();
           setPersistedCustomRowKeys((previous) =>
@@ -347,7 +376,7 @@ export default function DetailsSpaceAnalysisPage() {
       try {
         await updateOfficeSpaceCalculator({
           name: reportId,
-          data: { rooms: roomsPayload },
+          data: { rooms: roomsPayload, ...getTotalsPayload() },
         }).unwrap();
         refetchReport?.();
       } catch (error) {
@@ -361,6 +390,7 @@ export default function DetailsSpaceAnalysisPage() {
       specTypeDocumentNameByLabel,
       updateOfficeSpaceCalculator,
       refetchReport,
+      getTotalsPayload,
     ],
   );
 
@@ -412,14 +442,14 @@ export default function DetailsSpaceAnalysisPage() {
       try {
         await updateOfficeSpaceCalculator({
           name: reportId,
-          data: { rooms: roomsPayload },
+          data: { rooms: roomsPayload, ...getTotalsPayload() },
         }).unwrap();
         refetchReport?.();
       } catch (error) {
         console.warn('Failed to delete room from report', error);
       }
     },
-    [reportId, reportDocument, updateOfficeSpaceCalculator, refetchReport],
+    [reportId, reportDocument, updateOfficeSpaceCalculator, refetchReport, getTotalsPayload],
   );
 
   /** Area per unit by (spec label, room type docname) from Spec Type.room_type_areas */
@@ -547,15 +577,18 @@ export default function DetailsSpaceAnalysisPage() {
       ? null
       : calcResults(normalizeForCalc(values), { specType: specTypeDocument });
   const productivity =
-    reportId && apiStats
+    breakdownDerivedStats?.productivity ??
+    (reportId && apiStats
       ? apiStats.productionArea
-      : (results?.zonal?.find((z) => z.label === 'Productivity')?.sqft ?? 0);
+      : (results?.zonal?.find((z) => z.label === 'Productivity')?.sqft ?? 0));
   const utility =
-    reportId && apiStats
+    breakdownDerivedStats?.utility ??
+    (reportId && apiStats
       ? apiStats.utilityArea
-      : (results?.zonal?.find((z) => z.label === 'Utility')?.sqft ?? 0);
+      : (results?.zonal?.find((z) => z.label === 'Utility')?.sqft ?? 0));
   const spacePerPerson =
-    reportId && apiStats ? apiStats.spacePerPerson : (results?.spacePerPerson ?? 0);
+    breakdownDerivedStats?.spacePerPerson ??
+    (reportId && apiStats ? apiStats.spacePerPerson : (results?.spacePerPerson ?? 0));
 
   const efficiencyOpportunities = [
     {
@@ -655,9 +688,11 @@ export default function DetailsSpaceAnalysisPage() {
       : []);
 
   const totalSpaceNeeded =
-    reportId && apiStats ? apiStats.totalSpaceNeeded : (results?.estimatedSpaceNeeded ?? 0);
+    breakdownDerivedStats?.totalSpaceNeeded ??
+    (reportId && apiStats ? apiStats.totalSpaceNeeded : (results?.estimatedSpaceNeeded ?? 0));
   const seatingCapacity =
-    reportId && apiStats ? apiStats.seatingCapacity : (results?.workstations ?? 0);
+    breakdownDerivedStats?.seatingCapacity ??
+    (reportId && apiStats ? apiStats.seatingCapacity : (results?.workstations ?? 0));
 
   const hasAvailableCarpetArea = React.useMemo(() => {
     if (reportId) {
@@ -786,7 +821,7 @@ export default function DetailsSpaceAnalysisPage() {
                 meta={
                   <>
                     <span className='text-[12px] font-medium leading-[20px] text-osc-error font-[family-name:var(--font-family-sans)]'>
-                      {formatCompact(spacePerPerson)} sq ft.
+                      {formatCompact(spacePerPerson)} sqft.
                     </span>
                     <span className='text-[12px] font-medium leading-[20px] text-osc-text-secondary font-[family-name:var(--font-family-sans)]'>
                       space per person
@@ -834,6 +869,7 @@ export default function DetailsSpaceAnalysisPage() {
                 getSpecTypeOptionsForRoomType={getSpecTypeOptionsForRoomType}
                 onPersistRowChange={persistRoomRowChange}
                 onDeleteRoomRow={deleteRoomRow}
+                onBreakdownChange={handleBreakdownChange}
                 persistedCustomRowKeys={persistedCustomRowKeys}
                 readOnly={isSharedView}
               />

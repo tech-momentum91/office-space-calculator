@@ -34,13 +34,13 @@ export default function EfficiencyOpportunitiesCard({
         ))}
       </div>
 
-      <button
+      {/* <button
         type='button'
         className='w-full border-t-[0.888px] border-osc-border-light bg-white py-4 text-center text-[15.99px] font-semibold leading-[43.528px] text-osc-text-primary font-[family-name:var(--font-family-sans)]'
         onClick={onApplyAll}
       >
         {applyAllLabel}
-      </button>
+      </button> */}
     </Card>
   );
 }
