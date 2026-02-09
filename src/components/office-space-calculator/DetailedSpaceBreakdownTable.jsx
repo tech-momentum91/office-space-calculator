@@ -880,14 +880,14 @@ export default function DetailedSpaceBreakdownTable({
             </span>
           </div>
         </div>
-        <Button
+        {/* <Button
           type='button'
           variant='outline'
           className='h-10 rounded-[8px] border-osc-border-light'
         >
           <DownloadCloud className='h-4 w-4' aria-hidden='true' />
           Download
-        </Button>
+        </Button> */}
       </div>
       <div className='h-px w-full bg-osc-border' />
 
