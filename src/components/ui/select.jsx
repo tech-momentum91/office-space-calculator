@@ -79,6 +79,7 @@ const SelectContent = React.forwardRef(
       variant = 'default',
       sideOffset,
       viewportClassName,
+      hideScrollButtons = false,
       ...props
     },
     ref,
@@ -98,7 +99,7 @@ const SelectContent = React.forwardRef(
         )}
         {...props}
       >
-        <SelectScrollUpButton />
+        {!hideScrollButtons && <SelectScrollUpButton />}
         <SelectPrimitive.Viewport
           className={cn(
             'p-1',
@@ -113,7 +114,7 @@ const SelectContent = React.forwardRef(
         >
           {children}
         </SelectPrimitive.Viewport>
-        <SelectScrollDownButton />
+        {!hideScrollButtons && <SelectScrollDownButton />}
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   ),

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, forwardRef, useMemo } from 'react';
 import {
   Select,
   SelectContent,
@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { fetchCountries, DEFAULT_COUNTRY_CODE, parseContactNumber } from '@/constants/countries';
 import { cn } from '@/lib/utils';
+import { Search } from 'lucide-react';
 
 /** Renders flag image with fallback on load error. */
 function CountryFlag({ flag, label, className }) {
@@ -20,7 +21,7 @@ function CountryFlag({ flag, label, className }) {
     return (
       <span
         className={cn(
-          'inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f2f4f7] text-[10px]',
+          'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#f2f4f7] text-[10px]',
           className,
         )}
         aria-hidden='true'
@@ -33,6 +34,7 @@ function CountryFlag({ flag, label, className }) {
     <img
       src={flag}
       alt=''
+      role='presentation'
       className={cn('h-5 w-5 shrink-0 rounded-full object-cover', className)}
       loading='lazy'
       onError={() => setErrored(true)}
@@ -41,7 +43,8 @@ function CountryFlag({ flag, label, className }) {
 }
 
 /**
- * PhoneInput – shadcn-style: country Select + number Input in one row.
+ * PhoneInput – country selector (flag + chevron) + number input in one row.
+ * Dropdown: search bar + scrollable country list (flag | name | dial code).
  * onChange receives { countryCode, number, formattedValue }.
  */
 const PhoneInput = forwardRef(
@@ -51,7 +54,7 @@ const PhoneInput = forwardRef(
       value: controlledValue = '',
       onChange,
       onCountryCodeChange,
-      placeholder = 'Enter phone number',
+      placeholder = '(000) 000-0000',
       disabled = false,
       hasError = false,
       size = 'medium',
@@ -72,6 +75,7 @@ const PhoneInput = forwardRef(
     const [selectedCountryKey, setSelectedCountryKey] = useState('');
     const [countries, setCountries] = useState([]);
     const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+    const [countrySearch, setCountrySearch] = useState('');
 
     const countryCode =
       controlledCountryCode === undefined ? internalCountryCode : controlledCountryCode;
@@ -99,14 +103,14 @@ const PhoneInput = forwardRef(
 
     useEffect(() => {
       if (controlledCountryCode !== undefined) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- controlled sync
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- sync controlled prop to internal state
         setInternalCountryCode(controlledCountryCode);
       }
     }, [controlledCountryCode]);
 
     useEffect(() => {
       if (controlledValue !== undefined) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- controlled sync
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- sync controlled prop to internal state
         setInternalValue(controlledValue);
       }
     }, [controlledValue]);
@@ -115,11 +119,21 @@ const PhoneInput = forwardRef(
       if (countries.length > 0) {
         const c = countries.find((x) => x.value === countryCode);
         if (c) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect -- sync when countries load
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- sync when countries load or countryCode changes
           setSelectedCountryKey(c.uniqueKey);
         }
       }
     }, [countries, countryCode]);
+
+    const filteredCountries = useMemo(() => {
+      if (!countrySearch.trim()) return countries;
+      const q = countrySearch.toLowerCase().trim();
+      return countries.filter(
+        (c) =>
+          (c.label ?? c.name ?? '').toLowerCase().includes(q) ||
+          (c.value ?? '').toLowerCase().includes(q),
+      );
+    }, [countries, countrySearch]);
 
     const handleCountryCodeChange = (newCountryKey) => {
       const country = countries.find((c) => c.uniqueKey === newCountryKey);
@@ -156,8 +170,9 @@ const PhoneInput = forwardRef(
     return (
       <div
         className={cn(
-          'flex items-stretch overflow-hidden rounded-[8px] border bg-white shadow-[0px_1px_2px_rgba(228,229,231,0.24)]',
+          'flex items-stretch overflow-hidden rounded-[10px] border bg-white shadow-[0px_1px_2px_rgba(16,24,40,0.05)]',
           hasError ? 'border-[#f04438]' : 'border-[#e2e4e9]',
+          'focus-within:border-[#2970ff] focus-within:ring-1 focus-within:ring-[#2970ff]',
           className,
         )}
         {...rest}
@@ -169,11 +184,14 @@ const PhoneInput = forwardRef(
         >
           <SelectTrigger
             variant='bordered'
-            className='h-auto w-auto min-w-0 shrink-0 gap-2 rounded-r-none border-r border-[#e2e4e9] shadow-none focus:ring-0'
+            className={cn(
+              'h-[44px] w-auto min-w-0 shrink-0 gap-1.5 rounded-r-none border-0 border-r border-[#e2e4e9] bg-transparent px-3 shadow-none focus:ring-0 focus:ring-offset-0',
+              'rounded-l-[10px] border-r-[#e2e4e9]',
+            )}
             aria-label='Country code'
           >
             <SelectValue>
-              <span className='flex items-center gap-2'>
+              <span className='flex items-center gap-1.5'>
                 {selectedCountry?.flag &&
                 typeof selectedCountry.flag === 'string' &&
                 !selectedCountry.flag.startsWith('http') ? (
@@ -185,62 +203,80 @@ const PhoneInput = forwardRef(
                       className='shrink-0'
                     />
                   )}
-                <span className='text-[14px] font-normal text-[#0a0d14]'>
-                  {isLoadingCountries ? '…' : (selectedCountry?.value ?? DEFAULT_COUNTRY_CODE)}
-                </span>
               </span>
             </SelectValue>
           </SelectTrigger>
           <SelectContent
-            className='min-w-[260px] border border-[#e2e4e9] rounded-[8px] p-0 shadow-lg bg-white'
+            className='min-w-[280px] overflow-hidden rounded-[10px] border border-[#e2e4e9] bg-white p-0 shadow-[0px_4px_6px_-2px_rgba(16,24,40,0.06),0px_12px_16px_-4px_rgba(16,24,40,0.08)]'
             position='popper'
-            side='top'
-            sideOffset={4}
+            side='bottom'
+            sideOffset={6}
+            hideScrollButtons
+            onCloseAutoFocus={(e) => {
+              setCountrySearch('');
+            }}
             viewportClassName={cn(
-              'h-[260px] overflow-y-scroll overflow-x-hidden py-0',
+              'max-h-[280px] overflow-y-auto overflow-x-hidden py-0',
               '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-[#f9fafb] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d0d5dd]',
             )}
-            style={{ maxHeight: 280 }}
+            style={{ maxHeight: 320 }}
           >
+            {/* Sticky search bar at top */}
+            <div className='sticky top-0 z-10 border-b border-[#eaecf0] bg-white p-2'>
+              <div className='flex items-center gap-2 rounded-md border border-[#e2e4e9] bg-[#fafbfc] px-3 py-2'>
+                <Search className='h-4 w-4 shrink-0 text-[#98a2b3]' aria-hidden />
+                <input
+                  type='text'
+                  placeholder='Search'
+                  value={countrySearch}
+                  onChange={(e) => setCountrySearch(e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  className='w-full bg-transparent text-[14px] text-[#101828] placeholder:text-[#98a2b3] focus:outline-none'
+                  aria-label='Search countries'
+                />
+              </div>
+            </div>
             {isLoadingCountries ? (
-              <SelectItem value='loading' disabled>
+              <SelectItem value='loading' disabled className='py-3 pl-4'>
                 Loading...
               </SelectItem>
-            ) : countries.length > 0 ? (
-              countries.map((c) => (
+            ) : filteredCountries.length > 0 ? (
+              filteredCountries.map((c) => (
                 <SelectItem
                   key={c.uniqueKey}
                   value={c.uniqueKey}
                   variant='table'
                   className={cn(
-                    'flex items-center gap-2.5 py-2.5 pl-8 pr-4 text-[14px] leading-[20px] text-[#101828] border-b border-[#eaecf0] last:border-b-0 rounded-none',
+                    'flex cursor-pointer items-center gap-3 py-2.5 pl-4 pr-4 text-[14px] leading-[20px] text-[#101828]',
+                    'border-b border-[#eaecf0] last:border-b-0',
                     'data-[highlighted]:bg-[#f9fafb] data-[highlighted]:text-[#101828]',
+                    '[&>span:first-child]:hidden',
                   )}
                 >
-                  {c.flag && typeof c.flag === 'string' && !c.flag.startsWith('http') ? (
-                    <span className='flex h-5 w-5 shrink-0 items-center justify-center text-[16px]'>
-                      {c.flag}
-                    </span>
-                  ) : (
-                    <span className='flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f2f4f7]'>
-                      <CountryFlag
-                        flag={c.flag}
-                        label={c.label}
-                        className='h-5 w-5 rounded-full object-cover'
-                      />
-                    </span>
-                  )}
-                  <span className='flex min-w-0 flex-1 items-center justify-between gap-3'>
-                    <span className='truncate font-medium text-[#101828]'>
+                  <span className='flex min-w-0 flex-1 items-center gap-3'>
+                    {c.flag && typeof c.flag === 'string' && !c.flag.startsWith('http') ? (
+                      <span className='flex h-5 w-5 shrink-0 items-center justify-center text-[16px]'>
+                        {c.flag}
+                      </span>
+                    ) : (
+                      <span className='flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f2f4f7]'>
+                        <CountryFlag
+                          flag={c.flag}
+                          label={c.label}
+                          className='h-5 w-5 rounded-full object-cover'
+                        />
+                      </span>
+                    )}
+                    <span className='min-w-0 flex-1 truncate font-normal text-[#101828]'>
                       {c.label ?? c.name ?? c.code}
                     </span>
-                    <span className='shrink-0 text-[#667085] tabular-nums'>{c.value}</span>
+                    <span className='shrink-0 tabular-nums text-[#667085]'>{c.value}</span>
                   </span>
                 </SelectItem>
               ))
             ) : (
-              <SelectItem value='error' disabled>
-                Failed to load countries
+              <SelectItem value='error' disabled className='py-3 pl-4'>
+                No countries found
               </SelectItem>
             )}
           </SelectContent>
@@ -258,7 +294,7 @@ const PhoneInput = forwardRef(
           maxLength={maxLength}
           variant='basic'
           className={cn(
-            'flex-1 min-w-0 rounded-l-none border-0 border-transparent bg-transparent shadow-none focus-visible:ring-0',
+            'h-[44px] flex-1 min-w-0 rounded-l-none rounded-r-[10px] border-0 border-transparent bg-transparent py-2.5 pl-3 pr-4 text-[14px] text-[#0a0d14] placeholder:text-[#98a2b3] shadow-none focus-visible:ring-0',
             inputProps.className,
           )}
           {...inputProps}
@@ -295,9 +331,8 @@ export const PhoneInputController = ({
     if (value === lastFormattedValue) return;
     if (!value) {
       if (lastFormattedValue !== undefined && lastFormattedValue !== '') {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when value cleared
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- sync form value (prop) to internal state
         setPhoneNumber('');
-
         setLastFormattedValue('');
       }
       return;
@@ -307,6 +342,7 @@ export const PhoneInputController = ({
         const list = countries.length > 0 ? countries : await fetchCountries();
         if (list.length === 0) {
           const fetched = await fetchCountries();
+
           setCountries(fetched);
           return parseContactNumber(value, fetched);
         }
@@ -324,7 +360,7 @@ export const PhoneInputController = ({
 
   useEffect(() => {
     if (initialCountryCode && !value) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- initial sync
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync initial country when prop set and form empty
       setCountryCode(initialCountryCode);
     }
   }, [initialCountryCode, value]);
