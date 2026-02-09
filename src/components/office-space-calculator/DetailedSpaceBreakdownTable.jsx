@@ -536,7 +536,7 @@ export default function DetailedSpaceBreakdownTable({
                   aria-label='Add new room row'
                 >
                   <Plus className='h-4 w-4 shrink-0 text-osc-text-secondary' aria-hidden='true' />
-                  <span>Add new Room</span>
+                  <span>Add New Room</span>
                 </button>
               </div>
             );

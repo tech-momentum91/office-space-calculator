@@ -733,7 +733,10 @@ export default function DetailsSpaceAnalysisPage() {
   if (sessionPending) {
     return (
       <div className='relative flex min-h-screen items-center justify-center bg-white'>
-        <div className='text-[16px] font-medium text-osc-text-muted'>Checking session…</div>
+        <div
+          className='h-10 w-10 rounded-full border-4 border-[var(--color-osc-primary)] border-t-transparent animate-spin'
+          aria-hidden
+        />
       </div>
     );
   }

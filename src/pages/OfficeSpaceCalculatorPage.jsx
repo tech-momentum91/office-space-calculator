@@ -21,7 +21,7 @@ export default function OfficeSpaceCalculatorPage() {
         }}
       >
         <Header />
-
+        {/*
         <div className='relative mx-auto w-full max-w-[1280px] px-4 pb-24 pt-6 sm:px-5 lg:px-8 lg:pb-[215px] lg:pt-10'>
           <div className='grid items-start gap-10 lg:grid-cols-[1fr_420px] lg:gap-16'>
             <h1 className='flex w-full flex-col justify-center text-[52px] font-semibold leading-[104%] tracking-[-3px] text-white sm:text-[64px] lg:h-[230px] lg:w-[624px] lg:text-[64px]'>
@@ -46,12 +46,12 @@ export default function OfficeSpaceCalculatorPage() {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
       </section>
 
       <section
         id='calculator'
-        className="relative z-10 -mt-24 pb-10 pt-0 sm:-mt-28 sm:pb-14 lg:-mt-[201px] before:absolute before:inset-x-0 before:bottom-0 before:top-24 before:bg-[#f6f9fc] before:content-[''] sm:before:top-28 lg:before:top-[201px]"
+        className="relative z-10 -mt-48 pb-10 pt-0 sm:-mt-60 sm:pb-14 lg:-mt-[500px] before:absolute before:inset-x-0 before:bottom-0 before:top-48 before:bg-[#f6f9fc] before:content-[''] sm:before:top-60 lg:before:top-[500px]"
       >
         <div className='relative mx-auto w-full max-w-[1280px] px-4 sm:px-5 lg:px-8'>
           <div className='relative mx-auto w-full max-w-[1216px]'>
