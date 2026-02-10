@@ -13,6 +13,11 @@ const initialState = {
   sessionApiError: false,
   userPermissions: null, // Sidebar permissions data
   error: null,
+  emailSent: {
+    isLoading: false,
+    error: null,
+    status: null,
+  },
 };
 
 /**
@@ -98,6 +103,23 @@ export const loginAsync = createAsyncThunk(
 );
 
 /**
+ * Async thunk to request password reset email
+ * Calls Frappe reset_password API
+ */
+export const resetPasswordMail = createAsyncThunk(
+  'auth/resetPasswordMail',
+  async (email, { dispatch, rejectWithValue }) => {
+    try {
+      const { authApi } = await import('../api/authApi');
+      await dispatch(authApi.endpoints.resetPassword.initiate(email)).unwrap();
+      return { email };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+/**
  * Async thunk to handle logout
  */
 export const logoutAsync = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
@@ -151,6 +173,12 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    setError: (state, action) => {
+      state.error = action.payload?.message ?? null;
+    },
+    clearEmailSentError: (state) => {
+      state.emailSent.error = null;
     },
     setSessionChecked: (state, action) => {
       state.sessionChecked = action.payload;
@@ -243,6 +271,24 @@ const authSlice = createSlice({
           }
         }
       });
+
+    // Reset password email
+    builder
+      .addCase(resetPasswordMail.pending, (state) => {
+        state.emailSent.isLoading = true;
+        state.emailSent.error = null;
+      })
+      .addCase(resetPasswordMail.fulfilled, (state) => {
+        state.emailSent.isLoading = false;
+        state.emailSent.error = null;
+        state.emailSent.status = 'success';
+      })
+      .addCase(resetPasswordMail.rejected, (state, action) => {
+        state.emailSent.isLoading = false;
+        state.emailSent.error =
+          action.payload?.data?.message || action.payload?.message || 'Failed to send reset email';
+        state.emailSent.status = action.payload?.status;
+      });
   },
 });
 
@@ -251,6 +297,8 @@ export const {
   logoutSuccess,
   setUserPermissions,
   clearError,
+  setError,
+  clearEmailSentError,
   setSessionChecked,
   setSessionApiError,
 } = authSlice.actions;

@@ -3,7 +3,14 @@
  */
 
 // Public routes that should be accessible without authentication
-const PUBLIC_ROUTES = ['/login', '/reset-password', '/welcome', '/'];
+const PUBLIC_ROUTES = [
+  '/login',
+  '/reset-password',
+  '/email-sent',
+  '/set-password',
+  '/welcome',
+  '/',
+];
 
 /**
  * Clears all authentication data from localStorage

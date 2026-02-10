@@ -7,6 +7,9 @@ import { lazyLoad } from '@/utils/lazy-load';
 // Lazy load pages for better performance
 const WelcomePage = lazyLoad(() => import('@/pages/WelcomePage'));
 const LoginPage = lazyLoad(() => import('@/pages/auth/LoginPage'));
+const ResetPasswordPage = lazyLoad(() => import('@/pages/auth/ResetPasswordPage'));
+const EmailSentPage = lazyLoad(() => import('@/pages/auth/EmailSentPage'));
+const SetPasswordPage = lazyLoad(() => import('@/pages/auth/SetPasswordPage'));
 const DashboardPage = lazyLoad(() => import('@/pages/DashboardPage'));
 const OfficeSpaceCalculatorPage = lazyLoad(() => import('@/pages/OfficeSpaceCalculatorPage'));
 const DetailsSpaceAnalysisPage = lazyLoad(() => import('@/pages/DetailsSpaceAnalysisPage'));
@@ -49,6 +52,36 @@ const routes = [
       <RouteErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <LoginPage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+  {
+    path: '/reset-password',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <ResetPasswordPage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+  {
+    path: '/email-sent',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <EmailSentPage />
+        </Suspense>
+      </RouteErrorBoundary>
+    ),
+  },
+  {
+    path: '/set-password',
+    element: (
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <SetPasswordPage />
         </Suspense>
       </RouteErrorBoundary>
     ),

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -89,7 +89,15 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className='space-y-2'>
-              <Label htmlFor='password'>Password</Label>
+              <div className='flex items-center justify-between'>
+                <Label htmlFor='password'>Password</Label>
+                <Link
+                  to='/reset-password'
+                  className='text-sm text-neutral-600 hover:text-neutral-900'
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id='password'
                 type='password'

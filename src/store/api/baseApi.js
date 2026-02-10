@@ -6,6 +6,8 @@ import { logoutSuccess } from '../slices/authSlice';
 const PUBLIC_ROUTES = [
   '/login',
   '/reset-password',
+  '/email-sent',
+  '/set-password',
   '/welcome',
   '/details-space-analysis',
   '/details-space-analysis/:reportId',

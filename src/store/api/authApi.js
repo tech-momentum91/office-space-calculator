@@ -53,6 +53,32 @@ export const authApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Request password reset email
+     * POST /method/frappe.core.doctype.user.user.reset_password
+     */
+    resetPassword: builder.mutation({
+      query: (email) => ({
+        url: '/method/frappe.core.doctype.user.user.reset_password',
+        method: 'POST',
+        body: { user: email },
+        credentials: 'include',
+      }),
+    }),
+
+    /**
+     * Set new password using reset key (from welcome email link)
+     * POST /method/frappe.core.doctype.user.user.update_password
+     */
+    updatePassword: builder.mutation({
+      query: ({ key, new_password, logout_all_sessions = 0 }) => ({
+        url: '/method/frappe.core.doctype.user.user.update_password',
+        method: 'POST',
+        body: { key, new_password, logout_all_sessions },
+        credentials: 'include',
+      }),
+    }),
+
+    /**
      * Get user by email
      * GET /resource/User/{email}
      */
@@ -86,4 +112,6 @@ export const {
   useLazyGetSessionQuery,
   useGetUserByEmailQuery,
   useLazyGetUserByEmailQuery,
+  useResetPasswordMutation,
+  useUpdatePasswordMutation,
 } = authApi;
