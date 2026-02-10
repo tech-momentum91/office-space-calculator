@@ -776,6 +776,8 @@ export default function DetailsSpaceAnalysisPage() {
     );
   }
 
+  const showPageContent = !showUnlockModal;
+
   return (
     <div className='relative min-h-screen bg-white'>
       <div className={cn(showUnlockModal ? 'opacity-20 pointer-events-none select-none' : '')}>
@@ -786,115 +788,123 @@ export default function DetailsSpaceAnalysisPage() {
           isSharedView={isSharedView}
         />
 
-        {/* Page content */}
-        <div className='mx-auto w-full max-w-[1280px] px-6 pb-16 pt-10'>
-          <div className='flex flex-col gap-6'>
-            <PageSectionTitle
-              title='Your Detailed Space Analysis'
-              subtitle='Optimise your office space with intelligent recommendations'
-            />
-
-            {/* Top stats */}
-            <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
-              {reportId && isReportLoading ? (
-                <div className='col-span-full text-[14px] text-osc-text-muted'>Loading report…</div>
-              ) : reportId && isReportError ? (
-                <div className='col-span-full text-[14px] text-osc-text-muted'>
-                  Could not load this report.
-                </div>
-              ) : null}
-              <StatCard
-                title='Total Space Needed'
-                value={(totalSpaceNeeded ?? 0).toLocaleString()}
-                unit='sqft.'
-                gradient='var(--color-osc-gradient-stat-blue)'
-                iconWrapperClassName='bg-osc-primary'
-                icon={<RiBuildingLine className='h-4 w-4 text-white' aria-hidden='true' />}
-              />
-              <StatCard
-                title='Seating Capacity'
-                value={(seatingCapacity ?? 0).toLocaleString()}
-                unit='sqft.'
-                gradient='var(--color-osc-gradient-stat-orange)'
-                iconWrapperClassName='bg-osc-orange border-[0.667px] border-white'
-                icon={<img src={chairIcon} alt='' aria-hidden='true' className='h-4 w-4' />}
-                meta={
-                  <>
-                    <span className='text-[12px] font-medium leading-[20px] text-osc-error font-[family-name:var(--font-family-sans)]'>
-                      {formatCompact(spacePerPerson)} sqft.
-                    </span>
-                    <span className='text-[12px] font-medium leading-[20px] text-osc-text-secondary font-[family-name:var(--font-family-sans)]'>
-                      space per person
-                    </span>
-                  </>
-                }
-              />
-              {hasAvailableCarpetArea ? null : (
-                <>
-                  <StatCard
-                    title='Production Area'
-                    value={productivity.toLocaleString()}
-                    unit='sqft.'
-                    gradient='var(--color-osc-gradient-stat-teal)'
-                    iconWrapperClassName='bg-osc-teal border-[0.667px] border-white'
-                    icon={<LuMonitorSpeaker className='h-4 w-4 text-white' aria-hidden='true' />}
-                  />
-                  <StatCard
-                    title='Utility and Breakout'
-                    value={utility.toLocaleString()}
-                    unit='sqft.'
-                    gradient='var(--color-osc-gradient-stat-purple)'
-                    iconWrapperClassName='bg-osc-purple'
-                    icon={<Coffee className='h-4 w-4 text-white' aria-hidden='true' />}
-                  />
-                </>
-              )}
-              {hasAvailableCarpetArea ? (
-                <SpaceUtilizationCard
-                  totalSpaceNeeded={totalSpaceNeeded}
-                  availableCarpetArea={availableCarpetArea}
+        {/* Page content — only when user is logged in (or shared view) */}
+        {showPageContent ? (
+          <>
+            <div className='mx-auto w-full max-w-[1280px] px-6 pb-16 pt-10'>
+              <div className='flex flex-col gap-6'>
+                <PageSectionTitle
+                  title='Your Detailed Space Analysis'
+                  subtitle='Optimise your office space with intelligent recommendations'
                 />
-              ) : null}
+
+                {/* Top stats */}
+                <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
+                  {reportId && isReportLoading ? (
+                    <div className='col-span-full text-[14px] text-osc-text-muted'>
+                      Loading report…
+                    </div>
+                  ) : reportId && isReportError ? (
+                    <div className='col-span-full text-[14px] text-osc-text-muted'>
+                      Could not load this report.
+                    </div>
+                  ) : null}
+                  <StatCard
+                    title='Total Space Needed'
+                    value={(totalSpaceNeeded ?? 0).toLocaleString()}
+                    unit='sqft.'
+                    gradient='var(--color-osc-gradient-stat-blue)'
+                    iconWrapperClassName='bg-osc-primary'
+                    icon={<RiBuildingLine className='h-4 w-4 text-white' aria-hidden='true' />}
+                  />
+                  <StatCard
+                    title='Seating Capacity'
+                    value={(seatingCapacity ?? 0).toLocaleString()}
+                    unit='sqft.'
+                    gradient='var(--color-osc-gradient-stat-orange)'
+                    iconWrapperClassName='bg-osc-orange border-[0.667px] border-white'
+                    icon={<img src={chairIcon} alt='' aria-hidden='true' className='h-4 w-4' />}
+                    meta={
+                      <>
+                        <span className='text-[12px] font-medium leading-[20px] text-osc-error font-[family-name:var(--font-family-sans)]'>
+                          {formatCompact(spacePerPerson)} sqft.
+                        </span>
+                        <span className='text-[12px] font-medium leading-[20px] text-osc-text-secondary font-[family-name:var(--font-family-sans)]'>
+                          space per person
+                        </span>
+                      </>
+                    }
+                  />
+                  {hasAvailableCarpetArea ? null : (
+                    <>
+                      <StatCard
+                        title='Production Area'
+                        value={productivity.toLocaleString()}
+                        unit='sqft.'
+                        gradient='var(--color-osc-gradient-stat-teal)'
+                        iconWrapperClassName='bg-osc-teal border-[0.667px] border-white'
+                        icon={
+                          <LuMonitorSpeaker className='h-4 w-4 text-white' aria-hidden='true' />
+                        }
+                      />
+                      <StatCard
+                        title='Utility and Breakout'
+                        value={utility.toLocaleString()}
+                        unit='sqft.'
+                        gradient='var(--color-osc-gradient-stat-purple)'
+                        iconWrapperClassName='bg-osc-purple'
+                        icon={<Coffee className='h-4 w-4 text-white' aria-hidden='true' />}
+                      />
+                    </>
+                  )}
+                  {hasAvailableCarpetArea ? (
+                    <SpaceUtilizationCard
+                      totalSpaceNeeded={totalSpaceNeeded}
+                      availableCarpetArea={availableCarpetArea}
+                    />
+                  ) : null}
+                </div>
+
+                {/* Breakdown + opportunities */}
+                <div className='grid gap-4 lg:grid-cols-[1fr_360px]'>
+                  <DetailedSpaceBreakdownTable
+                    breakdownRows={breakdownRows}
+                    roomTypes={allRoomTypes}
+                    grandTotalSqft={Number(totalSpaceNeeded) || 0}
+                    efficiencyOpportunitiesCount={efficiencyOpportunities.length}
+                    areaPerUnitBySpaceType={areaPerUnitBySpaceType}
+                    specTypeOptions={specTypeOptions}
+                    getSpecTypeOptionsForRoomType={getSpecTypeOptionsForRoomType}
+                    onPersistRowChange={persistRoomRowChange}
+                    onDeleteRoomRow={deleteRoomRow}
+                    onBreakdownChange={handleBreakdownChange}
+                    persistedCustomRowKeys={persistedCustomRowKeys}
+                    readOnly={isSharedView}
+                  />
+
+                  <EfficiencyOpportunitiesCard opportunities={efficiencyOpportunities} />
+                </div>
+              </div>
             </div>
+            <BoqBanner />
 
-            {/* Breakdown + opportunities */}
-            <div className='grid gap-4 lg:grid-cols-[1fr_360px]'>
-              <DetailedSpaceBreakdownTable
-                breakdownRows={breakdownRows}
-                roomTypes={allRoomTypes}
-                grandTotalSqft={Number(totalSpaceNeeded) || 0}
-                efficiencyOpportunitiesCount={efficiencyOpportunities.length}
-                areaPerUnitBySpaceType={areaPerUnitBySpaceType}
-                specTypeOptions={specTypeOptions}
-                getSpecTypeOptionsForRoomType={getSpecTypeOptionsForRoomType}
-                onPersistRowChange={persistRoomRowChange}
-                onDeleteRoomRow={deleteRoomRow}
-                onBreakdownChange={handleBreakdownChange}
-                persistedCustomRowKeys={persistedCustomRowKeys}
-                readOnly={isSharedView}
-              />
+            {/* Illustration + footer */}
+            <section className='py-0 bg-white border-t border-neutral-200'>
+              <div className='container mx-auto px-6'>
+                <div className='py-8'>
+                  <img
+                    src={illustration}
+                    alt='Office workspace illustration'
+                    loading='lazy'
+                    className='w-full h-auto'
+                  />
+                </div>
+              </div>
+            </section>
 
-              <EfficiencyOpportunitiesCard opportunities={efficiencyOpportunities} />
-            </div>
-          </div>
-        </div>
-        <BoqBanner />
-
-        {/* Illustration + footer */}
-        <section className='py-0 bg-white border-t border-neutral-200'>
-          <div className='container mx-auto px-6'>
-            <div className='py-8'>
-              <img
-                src={illustration}
-                alt='Office workspace illustration'
-                loading='lazy'
-                className='w-full h-auto'
-              />
-            </div>
-          </div>
-        </section>
-
-        <Footer />
+            <Footer />
+          </>
+        ) : null}
       </div>
 
       <UnlockResultsModal

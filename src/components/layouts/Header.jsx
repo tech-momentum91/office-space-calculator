@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { copySuccessToastOptions } from '@/components/ui/sonner';
 import mainBg from '@/assets/image/Main.jpg';
 import { RiSendPlane2Fill } from 'react-icons/ri';
 import {
@@ -97,8 +98,9 @@ export default function Header({ onDownloadPdf, onGetPdfBlob, reportId, isShared
       await navigator.clipboard.writeText(shareUrl);
       setCopyDone(true);
       setTimeout(() => setCopyDone(false), 2000);
+      toast.success('Copied to clipboard', copySuccessToastOptions);
     } catch {
-      // fallback: select and cop
+      toast.error('Could not copy link');
     }
   }
 

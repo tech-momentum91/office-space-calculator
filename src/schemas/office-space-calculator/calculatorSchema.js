@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const calculatorDefaultValues = {
   workstationsRequired: '',
   existingCarpetArea: '',
-  meetingRooms: 20,
+  meetingRooms: 1,
   leadershipCabins: 1,
   managerCabins: 5,
   layoutType: 'compact',

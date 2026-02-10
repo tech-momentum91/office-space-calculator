@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronDown, ChevronUp, Coffee, DownloadCloud, Plus, Trash2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChevronDown, ChevronUp, Coffee, DownloadCloud, Plus, Search, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { LuMonitorSpeaker } from 'react-icons/lu';
@@ -75,6 +76,101 @@ function toVariant(areaGroup) {
 
 function toGroupLabel(areaGroup) {
   return areaGroup === 'Productivity Area' ? 'Production Area' : areaGroup;
+}
+
+/** Searchable room type dropdown: type to filter options, then pick one. */
+function SearchableRoomTypeSelect({
+  value,
+  options,
+  onSelect,
+  triggerLabel,
+  isNewlyAddedRoom,
+  ariaLabel,
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [search, setSearch] = React.useState('');
+
+  const filteredOptions = React.useMemo(() => {
+    const q = String(search ?? '')
+      .trim()
+      .toLowerCase();
+    if (!q) return options;
+    return options.filter((label) =>
+      String(label ?? '')
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [options, search]);
+
+  React.useEffect(() => {
+    if (!open) setSearch('');
+  }, [open]);
+
+  const handleSelect = (label) => {
+    onSelect?.(label);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type='button'
+          aria-label={ariaLabel}
+          className={cn(
+            "flex h-auto min-w-[140px] w-auto items-center justify-start gap-2 rounded-none border-0 bg-transparent p-0 font-['Inter',sans-serif] shadow-none [&>svg]:hidden",
+            'text-[14px] font-medium leading-[20px] text-[#101828]',
+            'hover:opacity-80 focus:outline-none focus:ring-0',
+            isNewlyAddedRoom &&
+              '[&>span[data-placeholder]]:italic [&>span[data-placeholder]]:text-osc-text-secondary',
+          )}
+        >
+          <span data-placeholder={!value ? '' : undefined}>{triggerLabel}</span>
+          <ChevronDown className='h-4 w-4 shrink-0 opacity-50' aria-hidden='true' />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align='start'
+        sideOffset={4}
+        className='w-[var(--radix-popover-trigger-width)] min-w-[200px] max-h-[280px] flex flex-col p-0 rounded-[6px] border border-[#d0d5dd] bg-white shadow-[0px_4px_6px_-2px_rgba(16,24,40,0.03),0px_12px_16px_-4px_rgba(16,24,40,0.08)]'
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <div className='p-2 border-b border-[#e2e4e9]'>
+          <div className='flex items-center gap-2 rounded-md border border-[#d0d5dd] bg-white px-2 py-1.5'>
+            <Search className='h-4 w-4 shrink-0 text-[#98a2b3]' aria-hidden='true' />
+            <input
+              type='text'
+              placeholder='Search room type…'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.stopPropagation()}
+              className='min-w-0 flex-1 bg-transparent text-[14px] leading-[20px] text-[#101828] placeholder:text-[#98a2b3] outline-none'
+              aria-label='Search room types'
+            />
+          </div>
+        </div>
+        <div className='overflow-y-auto flex-1 p-1 max-h-[220px]'>
+          {filteredOptions.length === 0 ? (
+            <div className='py-4 text-center text-[14px] text-[#98a2b3]'>No matches</div>
+          ) : (
+            filteredOptions.map((label) => (
+              <button
+                key={label}
+                type='button'
+                onClick={() => handleSelect(label)}
+                className={cn(
+                  'relative flex w-full cursor-pointer select-none items-center py-2 pl-3 pr-3 text-left text-[14px] font-medium leading-[20px] text-[#344054] rounded-sm outline-none hover:bg-[#f9fafb] focus:bg-[#f9fafb]',
+                  value === label && 'bg-[#f0f9ff] text-[#101828]',
+                )}
+              >
+                {label}
+              </button>
+            ))
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 function toBaseRoomTypeName(raw) {
@@ -621,13 +717,14 @@ export default function DetailedSpaceBreakdownTable({
             const triggerLabel = value
               ? item.roomType
               : isNewlyAddedRoom
-                ? 'Select a room Type'
-                : 'Select room';
+                ? 'Select  Room Type'
+                : 'Select Room';
             return (
               <div className='flex h-full items-center'>
-                <Select
+                <SearchableRoomTypeSelect
                   value={value}
-                  onValueChange={(v) =>
+                  options={options}
+                  onSelect={(v) =>
                     table.options.meta?.setRoomTypeByRowKey?.((prev) => {
                       const next = { ...prev, [item.rowKey]: v };
                       const nextSpaceType =
@@ -640,25 +737,10 @@ export default function DetailedSpaceBreakdownTable({
                       return next;
                     })
                   }
-                >
-                  <SelectTrigger
-                    variant='plain'
-                    aria-label={`Room type for ${item.roomType}`}
-                    className={cn(
-                      isNewlyAddedRoom &&
-                        '[&>span[data-placeholder]]:italic [&>span[data-placeholder]]:text-osc-text-secondary',
-                    )}
-                  >
-                    <span data-placeholder={!value ? '' : undefined}>{triggerLabel}</span>
-                  </SelectTrigger>
-                  <SelectContent variant='table' position='popper'>
-                    {options.map((label) => (
-                      <SelectItem key={label} value={label} variant='table'>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  triggerLabel={triggerLabel}
+                  isNewlyAddedRoom={isNewlyAddedRoom}
+                  ariaLabel={`Room type for ${item.roomType}`}
+                />
               </div>
             );
           }

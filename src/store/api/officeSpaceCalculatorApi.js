@@ -26,6 +26,10 @@ export const officeSpaceCalculatorApi = baseApi.injectEndpoints({
     /**
      * Fetch a single Office Space Calculator document by name/id.
      * Public API (guest allowed): GET ...office_space_calculator.get_office_space_calculator_doc
+     *
+     * Use the query hook (useGetOfficeSpaceCalculatorQuery) and read from its cache — do not
+     * copy this into a Redux slice. RTK Query is the single source of truth for server state;
+     * duplicating in a slice would hurt optimization (extra state, sync on refetch/mutation).
      */
     getOfficeSpaceCalculator: builder.query({
       query: (name) => ({

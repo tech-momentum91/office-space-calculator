@@ -66,6 +66,9 @@ export default function UnlockResultsModal({ open, onClose, onUnlock }) {
     }
   }
 
+  // Prevent closing on backdrop/outside click (Radix: preventDefault stops the close)
+  const preventClose = (e) => e.preventDefault();
+
   return (
     <Dialog open={open} onOpenChange={(v) => (!v ? onClose?.() : undefined)}>
       <DialogContent
@@ -73,6 +76,9 @@ export default function UnlockResultsModal({ open, onClose, onUnlock }) {
         overlayClassName='bg-[rgba(0,0,0,0.7)] backdrop-blur-[8px]'
         className='w-[min(920px,calc(100vw-32px))] max-w-[920px] gap-0 overflow-hidden rounded-[20px] border border-[rgba(0,0,0,0.1)] bg-[#F5F8FA] p-0 shadow-[0px_20px_80px_rgba(16,24,40,0.24)]'
         aria-label='Unlock results'
+        onPointerDownOutside={preventClose}
+        onInteractOutside={preventClose}
+        onEscapeKeyDown={preventClose}
       >
         <div className='flex flex-col md:flex-row overflow-hidden rounded-[20px]'>
           <div className='relative overflow-hidden rounded-t-[20px] md:rounded-l-[20px] md:rounded-tr-none bg-[#1D335A] px-8 py-10 text-white md:w-[431px] md:px-12 md:py-[78px]'>
