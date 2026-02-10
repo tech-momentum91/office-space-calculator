@@ -204,11 +204,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eaecf0',
     backgroundColor: '#ffffff',
   },
-  colRoomType: { flex: 2.8, fontSize: 10, fontWeight: 'bold', color: '#475467' },
-  colSpaceType: { flex: 2.2, fontSize: 10, fontWeight: 'bold', color: '#475467' },
-  colCount: { flex: 1.4, fontSize: 10, fontWeight: 'bold', color: '#475467' },
-  colAreaPerUnit: { flex: 1.7, fontSize: 10, fontWeight: 'bold', color: '#475467' },
-  colTotalArea: { flex: 1.7, fontSize: 10, fontWeight: 'bold', color: '#475467' },
+  colRoomType: { flex: 26, fontSize: 10, fontWeight: 'bold', color: '#475467' },
+  colSpaceType: { flex: 20, fontSize: 10, fontWeight: 'bold', color: '#475467' },
+  colCount: { flex: 14, fontSize: 10, fontWeight: 'bold', color: '#475467' },
+  colAreaPerUnit: { flex: 16, fontSize: 10, fontWeight: 'bold', color: '#475467' },
+  colTotalArea: { flex: 16, fontSize: 10, fontWeight: 'bold', color: '#475467' },
   groupHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eaecf0',
   },
   groupHeaderCellRoom: {
-    flex: 2.8,
+    flex: 26,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -235,13 +235,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#101828',
   },
-  groupHeaderCellSpacer: { flex: 2.2 },
-  groupHeaderCellCount: { flex: 1.4 },
-  groupHeaderCellArea: { flex: 1.7 },
-  groupHeaderCellTotal: {
-    flex: 1,
-    marginRight: 34,
-  },
+  groupHeaderCellSpacer: { flex: 20 },
+  groupHeaderCellCount: { flex: 14 },
+  groupHeaderCellArea: { flex: 16 },
+  groupHeaderCellTotal: { flex: 16 },
   groupHeaderSubtotal: {
     fontSize: 10,
     fontWeight: 'bold',
@@ -265,11 +262,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eaecf0',
     backgroundColor: '#fafbfc',
   },
-  dataColRoomType: { flex: 2.8, fontSize: 9, color: '#101828' },
-  dataColSpaceType: { flex: 2.2, fontSize: 9, color: '#475467' },
-  dataColCount: { flex: 1.4, fontSize: 9, color: '#101828' },
-  dataColAreaPerUnit: { flex: 1.7, fontSize: 9, color: '#475467' },
-  dataColTotalArea: { flex: 1.7, fontSize: 9, color: '#475467' },
+  dataColRoomType: { flex: 26, fontSize: 9, color: '#101828' },
+  dataColSpaceType: { flex: 20, fontSize: 9, color: '#475467' },
+  dataColCount: { flex: 14, fontSize: 9, color: '#101828' },
+  dataColAreaPerUnit: { flex: 16, fontSize: 9, color: '#475467' },
+  dataColTotalArea: { flex: 16, fontSize: 9, color: '#475467' },
   grandTotalRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -439,7 +436,7 @@ function formatNum(n) {
 
 function formatSqft(n) {
   const val = n != null && Number.isFinite(n) ? Math.round(Number(n)) : 0;
-  return `${val.toLocaleString()} sq ft.`;
+  return `${val.toLocaleString()} sqft.`;
 }
 
 function toGroupLabel(areaGroup) {
