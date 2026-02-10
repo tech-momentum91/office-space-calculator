@@ -167,7 +167,6 @@ export default function DetailsSpaceAnalysisPage() {
       throw new Error(getFrappeErrorMessage(error));
     }
 
-    setShowUnlockModal(false);
     // If we have pending report payload: login with email + temporary password, then create report and navigate
     try {
       const tempPassword =
@@ -186,6 +185,7 @@ export default function DetailsSpaceAnalysisPage() {
         } catch {
           // ignore
         }
+        setShowUnlockModal(false);
         navigate(`/details-space-analysis/${reportName}`, { replace: true });
       }
     } catch (error) {

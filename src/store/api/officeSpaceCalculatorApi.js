@@ -145,7 +145,7 @@ export const officeSpaceCalculatorApi = baseApi.injectEndpoints({
     /**
      * Send Office Space Report PDF to given emails (backend sends mail with PDF attached).
      * Public API (guest allowed): POST ...api.send_office_space_report_email
-     * Body: { recipient_emails: string[], pdf_base64: string, share_url?: string, report_id?: string }
+     * Body: { recipient_emails: string[], pdf_base64: string, share_url?: string, report_id?: string, first_name?: string, logo_url?: string }
      */
     sendOfficeSpaceReportEmail: builder.mutation({
       query: (payload) => ({

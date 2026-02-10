@@ -172,7 +172,7 @@ export default function OfficeSpaceSummaryPanel({ results, onEdit }) {
           </Tooltip>
         </div>
 
-        <div className='absolute left-[63px] top-[275px] w-[497px]'>
+        <div className='absolute left-1/2 top-[275px] w-[497px] -translate-x-1/2'>
           <div className='relative h-[309px] w-full overflow-hidden rounded-[16px] bg-[#fcfcfc]'>
             <div className='absolute left-6 top-6 flex w-[447px] flex-col gap-3'>
               <p className="bg-gradient-to-b from-[#101828] via-[#101828] to-[rgba(20,25,77,0.8)] bg-clip-text text-[16px] font-semibold leading-[1.2] tracking-[-0.32px] text-transparent font-['Plus_Jakarta_Sans',sans-serif]">

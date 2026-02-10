@@ -47,6 +47,10 @@ export default function Header({ onDownloadPdf, onGetPdfBlob, reportId, isShared
 
   const defaultShareUrl = typeof window === 'undefined' ? '' : window.location.href;
   const shareUrl = shareLinkUrl || defaultShareUrl;
+  // Phi Designs logo URL for report email (must be public https; add phi-designs-logo.png to public/ or set VITE_PHI_LOGO_URL)
+  const phiLogoUrl =
+    (typeof import.meta !== 'undefined' && import.meta.env?.PHI_LOGO_URL) ||
+    (typeof window !== 'undefined' ? `${window.location.origin}/phi-designs-logo.png` : '');
 
   useEffect(() => {
     if (shareDialogOpen && reportId) {
@@ -129,6 +133,7 @@ export default function Header({ onDownloadPdf, onGetPdfBlob, reportId, isShared
           pdf_base64: pdfBase64,
           share_url: shareUrl,
           report_id: reportId ?? undefined,
+          ...(phiLogoUrl ? { logo_url: phiLogoUrl } : {}),
         }).unwrap();
         toast.success(`Report sent to ${all.join(', ')}`);
         setShareDialogOpen(false);
