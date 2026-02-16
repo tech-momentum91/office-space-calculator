@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { store } from './store/store';
 import routes from './routes';
 import AppErrorBoundary from './components/error-boundaries/AppErrorBoundary';
+import PageAnalyticsTracker from './components/monitoring/PageAnalyticsTracker';
 import { validateEnv } from './utils/env-validation';
 import '@fontsource/plus-jakarta-sans/300.css';
 import '@fontsource/plus-jakarta-sans/400.css';
@@ -41,7 +42,12 @@ try {
  */
 function App() {
   const element = useRoutes(routes);
-  return element;
+  return (
+    <>
+      <PageAnalyticsTracker />
+      {element}
+    </>
+  );
 }
 
 /**

@@ -33,6 +33,7 @@ import {
   useGetSpecTypeQuery,
 } from '@/store/api/officeSpaceCalculatorApi';
 import { useCreateUserAndLeadMutation } from '@/store/api/leadsApi';
+import { markPageVisitLeadCaptured } from '@/utils/page-analytics';
 import chairIcon from '@/assets/svg/chair-01.svg';
 import DetailedSpaceBreakdownTable from '@/components/office-space-calculator/DetailedSpaceBreakdownTable';
 
@@ -166,6 +167,9 @@ export default function DetailsSpaceAnalysisPage() {
     } catch (error) {
       throw new Error(getFrappeErrorMessage(error));
     }
+
+    // Mark analytics: user captured as lead (unlocked on Details Space Analysis)
+    markPageVisitLeadCaptured({ report_id: reportId || undefined });
 
     // If we have pending report payload: login with email + temporary password, then create report and navigate
     try {
