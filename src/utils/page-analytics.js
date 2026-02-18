@@ -1,11 +1,15 @@
 /**
  * Page analytics utility for Lead Magnets.
  * Collects browser/device info and sends to the backend API.
+ * Country is resolved server-side from the request IP (Free IP API) to avoid CORS.
  */
 
 import { getApiUrl } from '@/utils/env-validation';
 
 const VISITOR_ID_KEY = 'phi_visitor_id';
+
+/** Cached client IP (from public API or backend) so we send visitor IP in analytics */
+let _cachedClientIp = null;
 
 /** Current page visit context - updated by PageAnalyticsTracker for lead-capture calls */
 let _currentVisit = {
@@ -45,18 +49,15 @@ export function getVisitorId() {
  */
 function getDeviceType() {
   const ua = navigator.userAgent || '';
-  console.log('user agent', ua);
   const lower = ua.toLowerCase();
-  console.log('lower', lower);
   if (
-    /tablet|ipad|playbook|silk/i.test(ua) ||
-    (lower.includes('mobile') && !lower.includes('mobile safari'))
+    (/tablet|ipad|playbook|silk/i.test(ua) ||
+      (lower.includes('mobile') && !lower.includes('mobile safari'))) &&
+    /ipad|tablet/i.test(ua)
   ) {
-    console.log('tablet');
-    if (/ipad|tablet/i.test(ua)) return 'tablet';
+    return 'tablet';
   }
   if (/mobile|android|iphone|ipod|blackberry|opera mini|iemobile/i.test(ua)) {
-    console.log('mobile');
     return 'mobile';
   }
   return 'desktop';
@@ -116,7 +117,100 @@ function getPageName(path) {
 }
 
 /**
- * Build analytics payload from current context
+ * Fetch client IP from a public API in the frontend (visitor's real IP).
+ * Tries ipify (JSONP to avoid CORS), then ipinfo.io. Result is cached per session.
+ * @returns {Promise<string|null>} Client IP or null
+ */
+export async function fetchClientIpFromPublicApi() {
+  const cached = _cachedClientIp;
+  if (cached !== null) return cached;
+
+  let resolvedIp = null;
+
+  // 1. Try ipify with JSONP (works from browser without CORS)
+  try {
+    const ip = await new Promise((resolve) => {
+      const callbackName = `__phi_ip_${Date.now()}`;
+      const timeout = setTimeout(() => {
+        resolve(null);
+        if (window[callbackName]) delete window[callbackName];
+        if (document.querySelector('#phi-ipify-script'))
+          document.querySelector('#phi-ipify-script')?.remove();
+      }, 5000);
+      window[callbackName] = (data) => {
+        clearTimeout(timeout);
+        resolve(data?.ip ? String(data.ip).trim() : null);
+        delete window[callbackName];
+        document.querySelector('#phi-ipify-script')?.remove();
+      };
+      const script = document.createElement('script');
+      script.id = 'phi-ipify-script';
+      script.src = `https://api.ipify.org?format=jsonp&callback=${callbackName}`;
+      script.addEventListener('error', () => {
+        clearTimeout(timeout);
+        resolve(null);
+        delete window[callbackName];
+      });
+      document.head.appendChild(script);
+    });
+    if (ip) resolvedIp = ip;
+  } catch {
+    // ignore
+  }
+
+  if (!resolvedIp) {
+    // 2. Try ipinfo.io (CORS-enabled for many origins)
+    try {
+      const res = await fetch('https://ipinfo.io/json', { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        resolvedIp = (data?.ip || '').trim() || null;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (resolvedIp) {
+    // eslint-disable-next-line require-atomic-updates -- intentional cache write after async fetch
+    _cachedClientIp = resolvedIp;
+  }
+  return resolvedIp;
+}
+
+/**
+ * Fetch client IP from backend (IP as seen by server for this request).
+ * Use when frontend and backend are same origin and proxy sends correct headers.
+ * @param {string} apiUrl - Base API URL
+ * @returns {Promise<string|null>} Client IP or null
+ */
+export async function fetchClientIpFromBackend(apiUrl) {
+  const cached = _cachedClientIp;
+  if (cached !== null) return cached;
+
+  let resolvedIp = null;
+  const LOG_API =
+    'phi_designs_backend.phi_design_app.doctype.lead_magnets_analytics.lead_magnets_analytics';
+  const url = `${apiUrl}/api/method/${LOG_API}.get_client_ip_for_analytics`;
+  try {
+    const res = await fetch(url, { method: 'GET', credentials: 'include' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    resolvedIp = (data?.message?.ip ?? data?.ip ?? '').trim() || null;
+  } catch {
+    return null;
+  }
+  if (resolvedIp) {
+    // eslint-disable-next-line require-atomic-updates -- intentional cache write after async fetch
+    _cachedClientIp = resolvedIp;
+  }
+  return resolvedIp;
+}
+
+/**
+ * Build analytics payload from current context.
+ * Country can be passed in options; otherwise the backend resolves it from the request IP (Free IP API).
+ * Pass options.ip_address to send the visitor IP (from fetchClientIpFromBackend) so backend uses it when proxied.
  */
 export function buildAnalyticsPayload(path, options = {}) {
   const pageName = options.page_name ?? getPageName(path);
@@ -125,6 +219,8 @@ export function buildAnalyticsPayload(path, options = {}) {
     page_name: pageName,
     visitor_id: getVisitorId(),
     referrer: document.referrer || undefined,
+    country: options.country ?? undefined,
+    ip_address: options.ip_address ?? undefined,
     device_type: getDeviceType(),
     operating_system: getOperatingSystem(),
     browser: getBrowser(),
@@ -148,12 +244,19 @@ const LOG_API =
 
 /**
  * Send analytics to the backend API. Returns the doc name on success.
+ * Country is resolved server-side from the request IP (Free IP API) to avoid CORS in the browser.
  */
 export async function logPageVisit(path, options = {}) {
   const apiUrl = getApiUrl();
   if (!apiUrl) return null;
 
-  const payload = buildAnalyticsPayload(path, options);
+  const clientIp = await fetchClientIpFromPublicApi();
+  if (!clientIp) {
+    const fallbackIp = await fetchClientIpFromBackend(apiUrl);
+    if (fallbackIp) _cachedClientIp = fallbackIp;
+  }
+  const ipToSend = _cachedClientIp ?? options.ip_address;
+  const payload = buildAnalyticsPayload(path, { ...options, ip_address: ipToSend });
   const url = `${apiUrl}/api/method/${LOG_API}.log_lead_magnets_analytics`;
 
   try {
@@ -167,10 +270,7 @@ export async function logPageVisit(path, options = {}) {
     if (!response.ok) return null;
     const data = await response.json();
     return data?.message?.name ?? data?.name ?? null;
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.warn('[Analytics] Failed to log page visit:', error.message);
-    }
+  } catch {
     return null;
   }
 }
